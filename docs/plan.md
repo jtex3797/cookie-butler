@@ -84,3 +84,73 @@
 - 추정으로 버튼을 고르는 기능은 엉뚱한 버튼을 누를 위험 때문에 사용하지 않음
 - 방문 기록에 해당하는 정보는 사용자가 켠 경우에만 저장, 외부 전송 없음
 - 새 파일과 설치물은 D 드라이브의 프로젝트 폴더 안에만 둠
+
+## 검토 기록 (2026-11-21 01:33)
+
+- 프로젝트 경로: D:/CodeWorkspace/my-project/cookie-helper
+- 검토 대상: D:/CodeWorkspace/my-project/cookie-helper/docs/plan.md
+- 설정: 에이전트 3, 라운드 3, 최우선 가치 단순성
+
+반영 9/9 (채택 9, 부분 0, 기각 0) / 완성도 90% / 추가 검토: 권장 1라운드 (파급)
+
+| 라운드 | 에이전트 역할 | 모델/노력치 | 입출력 토큰 | 핵심 지적 사항 | 반영 여부(채택/기각) 및 사유 |
+|---|---|---|---|---|---|
+| R1 | 사실 대조 | sonnet / medium | 563,536 / 4,541 | [Major] autoconsent가 업체 흔적만 찾고 창은 못 찾은 경우(cmpDetected) 상태가 안 바뀌어 다음 엔진과 NothingFound가 실행 안 됨 | 채택. 라이브러리 코드로 사실 확인. cmpDetected 7초 초과 시 못 찾음 처리 |
+| R1 | 예외·엣지케이스 | opus / high | 962,152 / 20,126 | [Major] 먼저 쓴 엔진이 못 찾음을 알린 뒤에도 계속 돌아 두 엔진이 같은 창을 처리, autoconsent 지시 중복 | 채택. 포기 뒤 메시지 차단, 지시 1회 제한, 창 확인 중이면 정지 타이머 재설정 |
+| 〃 | 〃 | 〃 | 〃 | [Major] 작은 알림이 "처리 중"에서 안 내려가는 경우(중간 단계 규칙, 프레임 이동) | 채택. 20초 안전 타이머 |
+| 〃 | 〃 | 〃 | 〃 | [Major] 서비스 워커가 잠든 뒤 늦게 열리는 iframe이 처리 완료 표시를 지우고 none 기록을 남김 | 채택. Searching, NothingFound는 맨 위 페이지만 전송 |
+| R1 | 보안·개인정보 | sonnet / medium | 327,468 / 6,032 | [Major] 꺼 둔 사이트 목록이 storage.sync에 저장되어 "브라우저 안에만 저장" 고지와 어긋남 | 채택. storage.local로 이동, 허용 범위 설정의 동기화 가능성은 고지 |
+| 〃 | 〃 | 〃 | 〃 | [Major] 쓰지 않는 권한 activeTab, tabs 선언 | 채택. 두 권한 제거 |
+| 〃 | 〃 | 〃 | 〃 | [Major] 원격 규칙을 제3자 저장소 master에서 받아 모든 사이트의 클릭에 사용, 사용자 지정 규칙 처리 잔존 | 채택. 규칙을 묶음에 포함해 원격 요청 제거, 사용자 지정 규칙 처리 제거 |
+| R2 | 예외·엣지케이스 | opus / high | 878,687 / 13,317 | [Major] 정지 타이머 재설정이, 확인 도중 예외로 checkRunning이 남으면 끝없이 반복되어 못 찾음이 영영 안 불림 | 채택. 재설정 6회(약 30초) 상한 |
+| R2 | 파급 | sonnet / medium | 354,833 / 2,764 | Pass | - |
+| R2 | 보안·개인정보 | sonnet / medium | 217,616 / 3,519 | [Major] 읽지 않는 statistics(동의 창 종류별 처리 횟수)가 고지 없이 항상 저장됨 | 채택. 저장 코드 제거 |
+| R3 | 예외·엣지케이스 | opus / high | 360,727 / 10,543 | Pass | - |
+| R3 | 보안·개인정보 | sonnet / low | 141,525 / 740 | Pass | - |
+
+총 소요 17.8분. 서브 8개 입력 3,806,544 / 출력 61,582. 메인 포함 합계 입력 14,662,431 / 출력 99,609.
+
+완성도 산정: 100 − 파급 미확인 1×10 = 90. 채택 9건은 모두 그 관점이 이후 라운드에 다시 투입되어 재검토됨(사실 대조는 관문 뒤 같은 라운드 나머지 관점 실행). R2 판정으로 변경 대상이 늘었으나(statistics 저장 제거, stopRetries 추가) R3에 파급 관점을 다시 넣지 않음. 참고: R3 보안·개인정보가 statistics 참조를 Grep으로 확인했고, 메인의 Grep에서 stopRetries, getStatistics, setStatistics 참조는 ConsentEngine.js:151과 GDPRConfig.js의 정의뿐이었음.
+
+### 집계 스크립트 출력
+
+- 시작: 2026-11-21 01:33 / 집계: 2026-11-21 01:51 / 소요: 17.8분 (로컬 시각)
+- 세션: 4c69f26d-3bef-4cad-ab67-d1645a2c98ac
+
+| # | 설명 | 타입 | 모델 | effort | 소요(s) | 도구 | 입력 | 캐시읽기 | 출력 | 상태 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | R1 사실 대조 | Explore | claude-sonnet-5-5 | medium | 46 | 15 | 563,536 | 474,299 | 4,541 | 완료 |
+| 2 | R1 예외·엣지케이스 | Plan | claude-opus-5-5 | high | 208 | 17 | 962,152 | 851,200 | 20,126 | 완료 |
+| 3 | R1 보안·개인정보 | Explore | claude-sonnet-5-5 | medium | 52 | 13 | 327,468 | 268,324 | 6,032 | 완료 |
+| 4 | R2 예외·엣지케이스 | Plan | claude-opus-5-5 | high | 144 | 16 | 878,687 | 803,571 | 13,317 | 완료 |
+| 5 | R2 파급 | Explore | claude-sonnet-5-5 | medium | 44 | 7 | 354,833 | 286,861 | 2,764 | 완료 |
+| 6 | R2 보안·개인정보 | Explore | claude-sonnet-5-5 | medium | 30 | 10 | 217,616 | 155,023 | 3,519 | 완료 |
+| 7 | R3 예외·엣지케이스 | Plan | claude-opus-5-5 | high | 114 | 9 | 360,727 | 315,408 | 10,543 | 완료 |
+| 8 | R3 보안·개인정보 | Explore | claude-sonnet-5-5 | low | 9 | 5 | 141,525 | 117,877 | 740 | 완료 |
+| - | 메인(지휘, 집계 시점 기준) | - | claude-fable-5-2 | - | - | 30 | 10,855,887 | 10,785,908 | 38,027 | - |
+| | 합계 (서브 8개 + 메인) | | | | | 122 | 14,662,431 | 14,058,471 | 99,609 | |
+
+### 최종 설계 요약
+
+- 엔진 2개를 차례로 사용: 필수만/전부 허용은 autoconsent 먼저, 기능까지/통계까지는 Consent-O-Matic 먼저, 못 찾으면 다른 엔진
+- 중복 처리 방지: autoconsent는 포기 뒤 메시지 차단과 지시 1회 제한, Consent-O-Matic은 창 확인 중 정지 타이머를 최대 6회 미룸, 두 번째 엔진 시작 전 PopupSeen 확인
+- 외부 통신 없음: 두 엔진의 규칙을 모두 묶음에 포함. 권한은 storage, cookies, scripting, 호스트 권한
+- 사이트 주소가 들어가는 값은 전부 storage.local, 방문 기록은 사용자가 켠 경우만 저장. 읽지 않는 통계 저장 제거
+- 실제 브라우저 검증은 미실시. 남은 계획: 빌드 확인, 시험 도구, 보완, 쿠키 지우기 버튼, 스토어 등록
+
+```json
+{"start":"2026-11-20T16:33:30.469Z","session":"4c69f26d-3bef-4cad-ab67-d1645a2c98ac","project":"cookie-helper","target":"D:/CodeWorkspace/my-project/cookie-helper/docs/plan.md",
+ "settings":{"agents":3,"rounds":3,"value":"단순성"},
+ "completeness":90,"more":"권장 1라운드 (파급)",
+ "main":{"model":"claude-fable-5-2","tools":30,"in":10855887,"cacheRead":10785908,"out":38027},
+ "agents":[
+  {"name":"R1 사실 대조","type":"Explore","effort":"medium","secs":46,"model":"claude-sonnet-5-5","tools":15,"in":563536,"cacheRead":474299,"out":4541,"adopt":1,"partial":0,"reject":0},
+  {"name":"R1 예외·엣지케이스","type":"Plan","effort":"high","secs":208,"model":"claude-opus-5-5","tools":17,"in":962152,"cacheRead":851200,"out":20126,"adopt":3,"partial":0,"reject":0},
+  {"name":"R1 보안·개인정보","type":"Explore","effort":"medium","secs":52,"model":"claude-sonnet-5-5","tools":13,"in":327468,"cacheRead":268324,"out":6032,"adopt":3,"partial":0,"reject":0},
+  {"name":"R2 예외·엣지케이스","type":"Plan","effort":"high","secs":144,"model":"claude-opus-5-5","tools":16,"in":878687,"cacheRead":803571,"out":13317,"adopt":1,"partial":0,"reject":0},
+  {"name":"R2 파급","type":"Explore","effort":"medium","secs":44,"model":"claude-sonnet-5-5","tools":7,"in":354833,"cacheRead":286861,"out":2764,"adopt":0,"partial":0,"reject":0},
+  {"name":"R2 보안·개인정보","type":"Explore","effort":"medium","secs":30,"model":"claude-sonnet-5-5","tools":10,"in":217616,"cacheRead":155023,"out":3519,"adopt":1,"partial":0,"reject":0},
+  {"name":"R3 예외·엣지케이스","type":"Plan","effort":"high","secs":114,"model":"claude-opus-5-5","tools":9,"in":360727,"cacheRead":315408,"out":10543,"adopt":0,"partial":0,"reject":0},
+  {"name":"R3 보안·개인정보","type":"Explore","effort":"low","secs":9,"model":"claude-sonnet-5-5","tools":5,"in":141525,"cacheRead":117877,"out":740,"adopt":0,"partial":0,"reject":0}
+ ]}
+```
