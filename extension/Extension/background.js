@@ -23,46 +23,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
         }
 
         case "GetRuleList": {
-            GDPRConfig.getDebugValues().then((debugValues)=>{
-                fetchRules(debugValues.alwaysForceRulesUpdate).then((rules)=>{
-                    reply(rules);
-                });
-            });
+            // Consent-O-Matic 규칙은 묶음 안의 파일을 사용 (외부에서 받지 않음)
+            loadRuleFile("consentomatic/rules.json").then((rules) => reply([rules])).catch(() => reply(null));
             //Return true to keep reply working after method has ended, async response
-            return true;
-        }
-
-        case "GetCustomRuleList": {
-            GDPRConfig.getCustomRuleLists().then((customRules)=>{
-                reply(customRules);
-            });
-            //Return true to keep reply working after method has ended, async response
-            return true;
-        }
-
-        case "AddCustomRule": {
-            let newRule = JSON.parse(message.substring(message.indexOf("|")+1));
-
-            GDPRConfig.getCustomRuleLists().then((customRules)=>{
-                let combinedCustomRules = Object.assign({}, customRules, newRule);
-
-                GDPRConfig.setCustomRuleLists(combinedCustomRules);
-            });
-
-            return false;
-        }
-
-        case "DeleteCustomRule": {
-            let deleteRule = message.split("|")[1];
-
-            GDPRConfig.getCustomRuleLists().then((customRules)=>{
-                delete customRules[deleteRule];
-
-                GDPRConfig.setCustomRuleLists(customRules).then(()=>{
-                    reply();
-                });
-            });
-
             return true;
         }
 
@@ -267,64 +230,6 @@ function setBadgeCheckmark(text, id) {
     api.setBadgeBackgroundColor({ color: "#e8500a", tabId: id });
 }
 
-function fetchRules(forceUpdate) {
-    // Make sure the cached rule-lists are up-to-date, fetch updates if needed
-    let maxStaleness = 22 * 3600 + (Math.random()*26*3600);  // Fetch frequency in seconds
-    let rulePromise = new Promise((resolve, reject) => {
-        GDPRConfig.getRuleLists().then((ruleLists) => {
-
-            let oldDefaultListIndex = ruleLists.indexOf("https://raw.githubusercontent.com/cavi-au/Consent-O-Matic/master/Rules.json");
-
-            if(oldDefaultListIndex !== -1) {
-                console.log("Cleaning old rule list, and replacing with new reference based list...");
-                ruleLists[oldDefaultListIndex] = "https://raw.githubusercontent.com/cavi-au/Consent-O-Matic/master/rules-list.json"
-                GDPRConfig.setRuleLists(ruleLists);
-            }
-
-            chrome.storage.local.get({ cachedEntries: {} }, async function ({ cachedEntries: cachedEntries }) {
-                let rules = [];
-                for (let ruleList of ruleLists) {
-                    let entry = cachedEntries[ruleList];
-
-                    // Check for cache
-                    if (!forceUpdate && (entry != null && 'timestamp' in entry && ((Date.now() / 1000) - entry.timestamp) < maxStaleness && 'rules' in entry)) {
-                        rules.push(entry.rules);
-                    } else {
-                        // No cache, or to old, try to fetch
-                        let theList = await fetchRulesList(ruleList);
-
-                        if(theList != null) {
-                            let storedEntry = {};
-                            rules.push(theList);
-                            cachedEntries[ruleList] = {
-                                timestamp: Date.now() / 1000,
-                                rules: theList
-                            };
-                        } else {
-                            //Reuse cached entry even though its out of date at this point
-                            console.log("Failed to fetch CoM rule list, check the URL", ruleList);
-                            if(entry != null) {
-                                rules.push(entry.rules);
-                            } else {
-                        	console.log("Giving up entirely on rule list, no cache available either",ruleList);
-                            }
-                        }
-                    }
-                }
-
-                chrome.storage.local.set({
-                    cachedEntries: cachedEntries
-                }, () => {
-                    resolve(rules);
-                });
-            });
-        });
-    });
-
-    return rulePromise;
-
-}
-
 let tabStatusMap = new Map();
 
 chrome.tabs.onUpdated.addListener((tabId, info, tab)=>{
@@ -335,39 +240,6 @@ chrome.tabs.onUpdated.addListener((tabId, info, tab)=>{
         tabStatusMap.set(tabId, STATUS.INIT);
     }
 });
-
-async function fetchRulesList(ruleList) {
-    try {
-
-        let response = await fetch(ruleList, { cache: "no-store" });
-        let theList = await response.json();
-
-        let theMergedList = Object.assign({}, theList);
-        delete theMergedList.references;
-
-        //If references is present, fetch those and merge into big json object
-        if(theList.references != null) {
-            let promises = [];
-            for(let ref of theList.references) {
-                promises.push(fetchRulesList(ref));
-            }
-
-            let lists = await Promise.all(promises);
-
-            lists.forEach((list) => {
-                Object.assign(theMergedList, list);
-            });
-        }
-
-        return theMergedList;
-
-    } catch (e) {
-        console.warn("Error fetching rulelist: ", ruleList, e.message);
-    }
-
-    return null;
-}
-
 
 // ---- DuckDuckGo autoconsent 연결 ----
 // 이 탭에서 쿠키 창을 찾은 적이 있는지 (두 엔진이 같은 창을 동시에 다루지 않게 하는 데 사용)
@@ -397,7 +269,7 @@ const AUTOCONSENT_CONFIG = {
 const ruleFiles = {};
 function loadRuleFile(name) {
     if (!ruleFiles[name]) {
-        ruleFiles[name] = fetch(chrome.runtime.getURL("autoconsent/" + name)).then((res) => res.json());
+        ruleFiles[name] = fetch(chrome.runtime.getURL(name)).then((res) => res.json());
     }
     return ruleFiles[name];
 }
@@ -430,11 +302,11 @@ async function handleAutoconsent(message, sender) {
             let rules;
             if ((await autoconsentAction()) === "optIn") {
                 // 허용 쪽 규칙은 전체 규칙 파일에만 있음
-                rules = { autoconsent: (await loadRuleFile("rules.json")).autoconsent };
+                rules = { autoconsent: (await loadRuleFile("autoconsent/rules.json")).autoconsent };
             } else {
                 rules = {
                     autoconsent: [],
-                    compact: filterCompactRules(await loadRuleFile("compact-rules.json"), {
+                    compact: filterCompactRules(await loadRuleFile("autoconsent/compact-rules.json"), {
                         url: sender.url || sender.tab.url,
                         mainFrame: frameId === 0
                     })

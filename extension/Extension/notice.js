@@ -25,6 +25,8 @@ export function startNotice(text) {
     document.body.appendChild(modal);
     const shown = modal;
     setTimeout(() => shown.classList.add("ConsentOMatic-Progress-Started"), 0);
+    // 끝났다는 소식이 안 오는 경우(중간 단계 규칙, 프레임 이동 등)에도 20초 뒤에는 내려감
+    timer = setTimeout(() => endNotice(null), 20000);
 }
 
 // 결과 문구를 약 2초 보여 준 뒤 내려감. text가 없으면 바로 내려감

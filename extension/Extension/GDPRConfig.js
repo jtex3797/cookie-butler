@@ -117,7 +117,7 @@ export default class GDPRConfig {
 
     static isActive(url) {
         return new Promise((resolve, reject)=>{
-            chrome.storage.sync.get({
+            chrome.storage.local.get({
                 disabledPages: {}
             }, ({disabledPages: disabledPages}) => {
                 resolve(disabledPages[url] == null);
@@ -127,7 +127,7 @@ export default class GDPRConfig {
 
     static setPageActive(url, active) {
         return new Promise((resolve, reject)=>{
-            chrome.storage.sync.get({
+            chrome.storage.local.get({
                 disabledPages: {}
             }, ({disabledPages: disabledPages}) => {
                 if(active) {
@@ -135,7 +135,7 @@ export default class GDPRConfig {
                 } else {
                     disabledPages[url] = true;
                 }
-                chrome.storage.sync.set({
+                chrome.storage.local.set({
                     disabledPages: disabledPages
                 }, ()=>{
                     resolve();

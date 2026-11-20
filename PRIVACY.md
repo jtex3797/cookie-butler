@@ -15,8 +15,8 @@
 
 ### 항상 저장하는 정보 (브라우저 안)
 
-- 쿠키 허용 범위 설정(필수만, 기능까지, 통계까지, 전부 허용)
-- 사용자가 확장 프로그램을 꺼 둔 사이트의 주소
+- 쿠키 허용 범위 설정(필수만, 기능까지, 통계까지, 전부 허용). 브라우저의 동기화 기능을 켜 둔 경우 이 설정은 브라우저 계정을 통해 다른 기기와 동기화될 수 있습니다.
+- 사용자가 확장 프로그램을 꺼 둔 사이트의 주소(이 브라우저에만 저장, 동기화하지 않음)
 - 쿠키 창을 처리한 시각(오늘 처리한 개수를 보여 주는 데 사용, 사이트 주소는 포함하지 않음)
 
 ### "기록 남기기"를 켰을 때만 저장하는 정보 (브라우저 안)
@@ -28,13 +28,11 @@
 
 ## 외부와의 통신
 
-- 쿠키 동의 창을 인식하는 규칙 목록을 GitHub(raw.githubusercontent.com)의 Consent-O-Matic 저장소에서 내려받습니다. 이때 일반적인 웹 요청에 포함되는 정보(IP 주소 등)가 GitHub에 전달될 수 있습니다. 방문한 사이트 정보는 보내지 않습니다.
-- 그 밖의 서버와는 통신하지 않습니다.
+- 확장 프로그램은 스스로 외부 서버와 통신하지 않습니다. 쿠키 동의 창을 인식하는 규칙은 확장 프로그램 안에 들어 있습니다.
 
 ## 권한을 쓰는 이유
 
-- 모든 사이트 접근: 쿠키 동의 창은 어느 사이트에서나 뜰 수 있어, 창을 찾아 대신 처리하려면 필요합니다.
-- 탭: 지금 보고 있는 사이트의 주소를 확인해 사이트별 켜기/끄기와 처리 상태 표시를 제공합니다.
+- 모든 사이트 접근: 쿠키 동의 창은 어느 사이트에서나 뜰 수 있어, 창을 찾아 대신 처리하려면 필요합니다. 지금 보고 있는 사이트의 주소를 확인해 사이트별 켜기/끄기와 처리 상태 표시를 제공하는 데에도 사용합니다.
 - 저장소: 설정과 기록을 브라우저 안에 저장합니다.
 - 스크립트 실행: 일부 쿠키 동의 창을 닫으려면 그 페이지가 제공하는 동의 기능을 호출해야 합니다. 확장 프로그램 안에 미리 들어 있는 정해진 함수만 실행합니다.
 - 쿠키: "기록 남기기"를 켰을 때 처리 전후의 쿠키 이름과 유효 기간을 읽습니다. 쿠키를 만들거나 바꾸지 않습니다.
@@ -54,5 +52,5 @@ Cookie Helper automatically answers cookie consent dialogs according to the leve
 - No data is sent to the developer or any third party. Everything is stored locally in your browser.
 - Browsing-related records (site hostname, result, and cookie names, domains and lifetimes before and after a consent dialog is handled) are stored only if you turn on "Keep records" on the records page. It is off by default. Cookie values are never stored.
 - You can delete the records at any time on the records page. Uninstalling the extension removes all stored data.
-- The extension downloads consent-dialog rule lists from the Consent-O-Matic repository on GitHub (raw.githubusercontent.com). No information about the sites you visit is sent.
+- The extension makes no network requests of its own. Consent-dialog rules are bundled with the extension.
 - No ads, analytics or tracking.

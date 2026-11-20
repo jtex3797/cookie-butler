@@ -42,7 +42,9 @@ async function contentScriptRunner() {
 
     const consentTypes = await GDPRConfig.getConsentValues();
     const level = levelOf(consentTypes);
-    chrome.runtime.sendMessage("Searching");
+    // 탭 상태 표시는 맨 위 페이지만 보냄 (늦게 열리는 iframe이 처리 완료 표시를 지우지 않게)
+    const isTop = window === window.parent;
+    if (isTop) chrome.runtime.sendMessage("Searching");
 
     // 엔진 2개를 차례로 사용.
     // - autoconsent(DuckDuckGo): 규칙이 많지만 "전부 거부"와 "전부 허용"만 가능
@@ -59,7 +61,7 @@ async function contentScriptRunner() {
         // 같은 탭의 다른 프레임이 이미 쿠키 창을 찾았으면 여기서는 더 찾지 않음 (두 엔진이 같은 창을 동시에 누르는 일 방지)
         if (await ask("PopupSeen")) return;
         second(() => {
-            chrome.runtime.sendMessage("NothingFound");
+            if (isTop) chrome.runtime.sendMessage("NothingFound");
         });
     });
 }
@@ -72,20 +74,17 @@ async function startConsentOMatic(host, consentTypes, onNothing) {
         return;
     }
 
-    const customRules = await GDPRConfig.getCustomRuleLists();
     fetchedRules.forEach((ruleObj)=>{
         delete ruleObj["$schema"];
     });
-    delete customRules["$schema"];
 
-    // Concat rule-lists to engine config in order
-    let config = patchRules(Object.assign({}, ...fetchedRules, extraRules, customRules));
+    // 묶음 안의 원본 규칙 + 직접 추가한 규칙
+    let config = patchRules(Object.assign({}, ...fetchedRules, extraRules));
 
     const debugValues = await GDPRConfig.getDebugValues();
     const generalSettings = await GDPRConfig.getGeneralSettings();
     if(debugValues.debugLog) {
         console.log("FetchedRules:", fetchedRules);
-        console.log("CustomRules:", customRules);
     }
 
     ConsentEngine.debugValues = debugValues;

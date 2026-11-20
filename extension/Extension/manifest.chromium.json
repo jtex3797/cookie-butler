@@ -5,8 +5,6 @@
 	"version": "REPLACED_BY_BUILD_SCRIPT",
 	"manifest_version": 3,
 	"permissions": [
-		"activeTab",
-		"tabs",
 		"storage",
 		"cookies",
 		"scripting"

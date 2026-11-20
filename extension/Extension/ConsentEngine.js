@@ -145,6 +145,12 @@ export default class ConsentEngine {
         }
 
         this.stopEngineId = setTimeout(() => {
+            // 창이 뜨는지 확인하는 중이면 "못 찾음"을 알리지 않고 다시 기다림
+            // (알려 버리면 다른 엔진이 시작돼 같은 창을 둘이 처리할 수 있음)
+            if (self.checkRunning) {
+                self.startStopTimeout();
+                return;
+            }
             if (ConsentEngine.debugValues.debugLog) {
                 console.log("No CMP detected in 5 seconds, stopping engine...");
             }

@@ -91,6 +91,10 @@ module.exports = env=>({
     }, {
         from: "node_modules/@duckduckgo/autoconsent/LICENSE",
         to: "autoconsent/LICENSE.txt"
+    }, {
+        // Consent-O-Matic 규칙(받은 판: 8ca8500, 2025-11-07)을 합친 파일
+        from: "rules/consent-o-matic-rules.json",
+        to: "consentomatic/rules.json"
     }]}),
     new ZipPlugin({
       path: 'dist/',
