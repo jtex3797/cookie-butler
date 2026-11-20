@@ -44,8 +44,70 @@ const usercentricsV3 = {
     ]
 };
 
+// cookieyes: 원본 규칙 목록에 없음
+// 확인: cookieyes.com (2026-11-21)
+const click = (selector) => ({ type: "click", target: { selector } });
+const ckySwitch = (name, type) => ({
+    type,
+    matcher: { type: "checkbox", target: { selector: `#ckySwitch${name}` } },
+    toggleAction: click(`#ckySwitch${name}`)
+});
+
+const cookieyes = {
+    detectors: [{
+        presentMatcher: [{ type: "css", target: { selector: ".cky-consent-container" } }],
+        showingMatcher: [{ type: "css", target: { selector: ".cky-consent-container", displayFilter: true } }]
+    }],
+    methods: [
+        {
+            name: "HIDE_CMP",
+            action: {
+                type: "list",
+                actions: [
+                    { type: "hide", target: { selector: ".cky-consent-container" } },
+                    { type: "hide", target: { selector: ".cky-modal" } },
+                    { type: "hide", target: { selector: ".cky-overlay" } }
+                ]
+            }
+        },
+        { name: "OPEN_OPTIONS" },
+        {
+            name: "DO_CONSENT",
+            action: {
+                // 전부 거부면 "Reject All", 전부 허용이면 "Accept All", 그 사이면 설정에서 종류별로 맞춘 뒤 저장
+                type: "ifallownone",
+                trueAction: click(".cky-consent-container .cky-btn-reject"),
+                falseAction: {
+                    type: "ifallowall",
+                    trueAction: click(".cky-consent-container .cky-btn-accept"),
+                    falseAction: {
+                        type: "list",
+                        actions: [
+                            click(".cky-consent-container .cky-btn-customize"),
+                            { type: "waitcss", target: { selector: "#ckySwitchfunctional" }, retries: 40, waitTime: 50 },
+                            { type: "wait", waitTime: 200 },
+                            {
+                                type: "consent",
+                                consents: [
+                                    ckySwitch("functional", "A"),
+                                    ckySwitch("analytics", "B"),
+                                    ckySwitch("performance", "B"),
+                                    ckySwitch("advertisement", "F")
+                                ]
+                            },
+                            click(".cky-modal .cky-btn-preferences")
+                        ]
+                    }
+                }
+            }
+        },
+        { name: "SAVE_CONSENT" }
+    ]
+};
+
 export default {
-    "usercentrics_v3": usercentricsV3
+    "usercentrics_v3": usercentricsV3,
+    "cookieyes": cookieyes
 };
 
 // 원본 규칙을 통째로 바꾸지 않고 부족한 부분만 덧붙임 (원본이 갱신돼도 계속 따라감)
