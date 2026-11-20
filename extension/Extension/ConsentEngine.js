@@ -205,7 +205,8 @@ export default class ConsentEngine {
             this.stopObserver();
 
             if (cmps.length > 1) {
-                console.warn("Found multiple CMPS's maybee rewise detection rules...", cmps);
+                // 한 페이지에서 규칙이 여러 개 맞은 경우. 첫 번째 규칙으로 진행하므로 오류는 아님
+                console.log("쿠키 도우미: 맞는 규칙 " + cmps.length + "개, 첫 번째로 진행:", cmps.map((c) => c.name).join(", "));
             }
 
             let cmp = cmps[0];
