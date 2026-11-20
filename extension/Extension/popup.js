@@ -42,6 +42,12 @@ GDPRConfig.getConsentValues().then((values) => {
     document.querySelectorAll("#tiles .tile").forEach((t, i) => t.addEventListener("click", () => setLevel(i)));
 });
 
+// 기록 화면 열기
+$("#openLog").addEventListener("click", () => {
+    chrome.tabs.create({ url: chrome.runtime.getURL("log.html") });
+    window.close();
+});
+
 // 오늘 처리 건수
 chrome.storage.local.get({ handledLog: [] }, ({ handledLog }) => {
     const start = new Date();

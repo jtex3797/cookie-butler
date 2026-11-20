@@ -113,6 +113,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
             });
 
             logVisit(json.url, "ok", json.cmp);
+            scheduleAfterSnapshot(sender.tab, json.cmp);
 
             // 처리 기록 저장 (오늘 처리 건수 표시에 사용)
             chrome.storage.local.get({ handledLog: [] }, ({ handledLog }) => {
@@ -121,6 +122,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
             });
 	    reply();
             return false;
+        }
+
+        case "CMPShowing": {
+            // 동의 창을 처리하기 직전의 쿠키 상태 기록
+            const tab = sender.tab;
+            snapshotCookies(tab).then((list) => {
+                pendingCookies.set(tab.id, { h: hostOf(tab.url), t: Date.now(), before: list });
+                reply();
+            }).catch(() => reply());
+            return true;
         }
 
         case "GetStatus": {
@@ -150,6 +161,78 @@ function logVisit(host, r, cmp) {
             chrome.storage.local.set({ visitLog: visitLog.slice(-2000) }, resolve);
         });
     }));
+}
+
+// ---- 처리 전후 쿠키 기록 ----
+// 쿠키 값은 저장하지 않고 이름, 주소, 유효 기간만 저장
+let pendingCookies = new Map();
+
+// 페이지가 불러온 주소 목록을 페이지 쪽에 물어봄
+function askHosts(tabId) {
+    return new Promise((resolve) => {
+        try {
+            chrome.tabs.sendMessage(tabId, "GetHosts", { frameId: 0 }, (hosts) => {
+                if (chrome.runtime.lastError || !Array.isArray(hosts)) resolve([]);
+                else resolve(hosts);
+            });
+        } catch (e) {
+            resolve([]);
+        }
+    });
+}
+
+// 사이트 자신의 쿠키인지 외부 업체 쿠키인지 (주소 끝부분 비교, 대략적인 판정)
+function isExternal(site, domain) {
+    const s = site.replace(/^www\./, "");
+    return !(s === domain || s.endsWith("." + domain) || domain.endsWith("." + s));
+}
+
+async function snapshotCookies(tab) {
+    const site = hostOf(tab.url);
+    if (!site || !chrome.cookies) return [];
+    const hosts = new Set([site, ...(await askHosts(tab.id))]);
+    const seen = new Map();
+    for (const host of [...hosts].slice(0, 80)) {
+        let cookies = [];
+        try {
+            cookies = await chrome.cookies.getAll({ url: "https://" + host + "/" });
+        } catch (e) { /* 읽을 수 없는 주소는 건너뜀 */ }
+        for (const c of cookies) {
+            const d = c.domain.replace(/^\./, "");
+            const key = c.name + "|" + d + "|" + c.path;
+            if (seen.has(key)) continue;
+            seen.set(key, {
+                n: c.name,
+                d: d,
+                x: isExternal(site, d),
+                // 남은 유효 기간(일). 0은 브라우저를 닫으면 사라지는 쿠키
+                e: c.session ? 0 : Math.max(1, Math.round((c.expirationDate - Date.now() / 1000) / 86400))
+            });
+        }
+    }
+    return [...seen.values()].slice(0, 200);
+}
+
+// 처리 4초 뒤 다시 읽어서 새로 생긴 쿠키만 골라 저장
+function scheduleAfterSnapshot(tab, cmp) {
+    const pending = pendingCookies.get(tab.id);
+    if (!pending) return;
+    pendingCookies.delete(tab.id);
+    setTimeout(async () => {
+        let after = [];
+        try {
+            after = await snapshotCookies(tab);
+        } catch (e) { /* 탭이 닫힌 경우 */ }
+        const key = (c) => c.n + "|" + c.d;
+        const had = new Set(pending.before.map(key));
+        const added = after.filter((c) => !had.has(key(c)));
+        const v = await GDPRConfig.getConsentValues();
+        const level = (v.D || v.E || v.F || v.X) ? 3 : v.B ? 2 : v.A ? 1 : 0;
+        chrome.storage.local.get({ cookieLog: [] }, ({ cookieLog }) => {
+            cookieLog.push({ h: pending.h, t: pending.t, c: cmp, lv: level, before: pending.before, after: added });
+            chrome.storage.local.set({ cookieLog: cookieLog.slice(-150) });
+        });
+    }, 4000);
 }
 
 function hostOf(url) {

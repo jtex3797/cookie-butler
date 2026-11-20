@@ -18,6 +18,10 @@ module.exports = env=>({
       "./Extension/icon_128.png",
       "./Extension/hide.svg", "./Extension/logo.svg", "./Extension/minimize.svg"
     ],
+    log: [
+      './Extension/log.js',
+      './Extension/log.html'
+    ],
     ui: [
       './Extension/popup.js',
       './Extension/popup.html'

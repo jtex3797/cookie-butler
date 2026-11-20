@@ -249,6 +249,21 @@ export default class ConsentEngine {
                             try {
                                 self.numClicks = 0;
 
+                                // 처리 전 쿠키 상태를 먼저 기록하게 함 (최대 1.5초 대기)
+                                await new Promise((resolve) => {
+                                    const timer = setTimeout(resolve, 1500);
+                                    try {
+                                        chrome.runtime.sendMessage("CMPShowing", () => {
+                                            void chrome.runtime.lastError;
+                                            clearTimeout(timer);
+                                            resolve();
+                                        });
+                                    } catch (e) {
+                                        clearTimeout(timer);
+                                        resolve();
+                                    }
+                                });
+
                                 if (!ConsentEngine.debugValues.skipHideMethod) {
                                     self.showProgressDialog("쿠키 창 처리 중");
                                 }

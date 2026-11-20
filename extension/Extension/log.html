@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쿠키 도우미 기록</title>
+<style>
+:root{--bg:#121418;--panel:#1c2026;--raise:#282d35;--raise2:#343a44;--text:#ece8df;--mute:#9299a3;--acc:#e8500a;--acc2:#ff6a1f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:14px;line-height:1.5;padding:28px 20px 80px}
+main{max-width:980px;margin:0 auto}
+button,input{font:inherit;color:inherit;border:0}
+button{cursor:pointer}
+h1{font-size:22px}
+.lead{color:var(--mute);font-size:13px;margin:2px 0 18px}
+.top{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.top .sp{flex:1}
+.btn{background:var(--raise);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600}
+.btn:hover{background:var(--raise2)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.stat{background:var(--panel);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat small{color:var(--mute);font-size:12px}
+.stat.hot b{color:var(--acc2)}
+.bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.chip{background:var(--raise);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600}
+.chip.on{background:var(--acc);color:#fff}
+.bar input{flex:1;min-width:160px;background:var(--raise);border-radius:8px;padding:7px 12px;outline:0}
+.bar input:focus{background:var(--raise2)}
+.row{background:var(--panel);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.head{width:100%;display:grid;grid-template-columns:minmax(0,1.4fr) 150px minmax(0,1.5fr) 110px 20px;gap:12px;align-items:center;padding:12px 14px;text-align:left;background:transparent}
+.head:hover{background:var(--raise)}
+.head .h{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.head .ck{color:var(--mute);font-size:13px}
+.head .ck b{color:var(--text)}
+.head .ck .add{color:var(--acc2)}
+.head time{color:var(--mute);font-size:12px;text-align:right}
+.head i{width:9px;height:9px;border-right:3px solid var(--mute);border-bottom:3px solid var(--mute);transform:rotate(45deg);transition:transform .2s}
+.row.open .head i{transform:rotate(225deg)}
+.res{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:6px;padding:3px 9px;background:var(--raise2);white-space:nowrap}
+.res.ok{background:var(--acc);color:#fff}
+.res.fail{background:#3a2218;color:var(--acc2)}
+.body{display:none;padding:4px 14px 16px}
+.row.open .body{display:block}
+.meta{color:var(--mute);font-size:12px;margin-bottom:10px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.box{background:var(--raise);border-radius:10px;padding:12px}
+.box h3{font-size:13px;margin-bottom:8px}
+.box h3 span{color:var(--mute);font-weight:400}
+.ckrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 84px;gap:8px;font-size:12px;padding:5px 0;align-items:center}
+.ckrow+.ckrow{border-top:2px solid var(--panel)}
+.ckrow .n{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ckrow .d{color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ckrow .e{color:var(--mute);text-align:right}
+.ext{background:var(--acc);color:#fff;border-radius:4px;padding:0 5px;font-size:10px;font-weight:700;margin-right:5px}
+.empty{color:var(--mute);font-size:13px;padding:6px 0}
+.none{background:var(--panel);border-radius:12px;padding:40px 20px;text-align:center;color:var(--mute)}
+.sample{background:#3a2218;color:var(--acc2);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:14px}
+@media(max-width:720px){.head{grid-template-columns:minmax(0,1fr) auto 20px}.head .ck,.head time{display:none}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div><h1>쿠키 도우미 기록</h1><p class="lead">사이트별 처리 결과와, 동의 창을 처리하기 전후에 심긴 쿠키. 이 PC 브라우저 안에만 저장됨.</p></div>
+    <div class="sp"></div>
+    <button class="btn" id="export">파일로 내보내기</button>
+    <button class="btn" id="clear">기록 삭제</button>
+  </div>
+  <div id="sample" class="sample" hidden>확장 프로그램 밖에서 연 미리 보기 화면. 아래는 예시 자료.</div>
+  <div class="stats" id="stats"></div>
+  <div class="bar" id="bar">
+    <button class="chip on" data-f="all">전체</button>
+    <button class="chip" data-f="ok">처리 완료</button>
+    <button class="chip" data-f="fail">처리 못 함</button>
+    <button class="chip" data-f="none">쿠키 창 없음</button>
+    <input id="q" type="search" placeholder="사이트 주소 검색" aria-label="사이트 주소 검색">
+  </div>
+  <div id="list"></div>
+</main>
+<script src="log.js"></script>
+</body>
+</html>

@@ -79,6 +79,22 @@ async function contentScriptRunner() {
     });
 }
 
+// 맨 위 페이지만: 이 페이지가 불러온 주소 목록을 알려 줌 (쿠키 기록용)
+if (window === window.parent) {
+    chrome.runtime.onMessage.addListener((message, sender, reply) => {
+        if (message !== "GetHosts") return;
+        const hosts = new Set([location.host]);
+        try {
+            for (const entry of performance.getEntriesByType("resource")) {
+                try {
+                    hosts.add(new URL(entry.name).host);
+                } catch (e) { /* 주소가 아닌 항목 */ }
+            }
+        } catch (e) { /* 측정 기록을 못 읽는 페이지 */ }
+        reply([...hosts].filter(Boolean).slice(0, 80));
+    });
+}
+
 window.consentScrollBehaviours = {};
 function getCalculatedStyles() {
     ["html","html body"].forEach(element=>{
