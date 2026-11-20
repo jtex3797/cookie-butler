@@ -62,6 +62,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
         }
 
         case "CMPError": {
+            logVisit(hostOf(sender.tab.url), "fail", null);
             if(tabStatusMap.get(sender.tab.id) !== STATUS.HANDLED) {
                 setBadgeCheckmark("\u2717", sender.tab.id);
                 tabStatusMap.set(sender.tab.id, STATUS.ERROR);
@@ -72,6 +73,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
 
         case "NothingFound": {
             if(tabStatusMap.get(sender.tab.id) !== STATUS.HANDLED) {
+                logVisit(hostOf(sender.tab.url), "none", null);
                 setBadgeCheckmark("", sender.tab.id);
                 tabStatusMap.set(sender.tab.id, STATUS.NOTHING);
             }
@@ -110,6 +112,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
                 GDPRConfig.setStatistics(entries);
             });
 
+            logVisit(json.url, "ok", json.cmp);
+
             // 처리 기록 저장 (오늘 처리 건수 표시에 사용)
             chrome.storage.local.get({ handledLog: [] }, ({ handledLog }) => {
                 handledLog.push({ h: json.url, t: Date.now(), c: json.cmp });
@@ -131,6 +135,30 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
 	console.log(ex);
     }
 });
+
+// 사이트별 처리 결과 기록. r: "ok" 처리 완료, "fail" 처리 못 함, "none" 쿠키 창 못 찾음
+// 같은 사이트의 같은 결과는 6시간 안에 1번만 기록 (쓰기는 차례대로 처리)
+let visitQueue = Promise.resolve();
+function logVisit(host, r, cmp) {
+    if (!host) return;
+    visitQueue = visitQueue.then(() => new Promise((resolve) => {
+        chrome.storage.local.get({ visitLog: [] }, ({ visitLog }) => {
+            const now = Date.now();
+            const dup = visitLog.some((e) => e.h === host && e.r === r && now - e.t < 6 * 3600 * 1000);
+            if (dup) return resolve();
+            visitLog.push({ h: host, t: now, r: r, c: cmp });
+            chrome.storage.local.set({ visitLog: visitLog.slice(-2000) }, resolve);
+        });
+    }));
+}
+
+function hostOf(url) {
+    try {
+        return new URL(url).host;
+    } catch (e) {
+        return "";
+    }
+}
 
 function setBadgeCheckmark(text, id) {
     const api = chrome.action || chrome.browserAction;
