@@ -1,5 +1,5 @@
 // 기록 화면. 저장 형식은 background.js의 logVisit, scheduleAfterSnapshot 참고
-// visitLog: { h 사이트, t 시각, r 결과(ok|fail|none), c 동의 창 종류 }
+// visitLog: { h 사이트, t 시각, r 결과(ok|fail|none), c 동의 창 종류, e 처리 엔진(ac|com) }
 // cookieLog: { h, t, c, lv 허용 단계, before 처리 전 쿠키, after 처리 후 새 쿠키 } / 쿠키: { n 이름, d 주소, x 외부 여부, e 남은 일수(0은 브라우저 닫을 때까지) }
 
 const $ = (s) => document.querySelector(s);

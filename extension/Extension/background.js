@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
         }
 
         case "CMPError": {
-            logVisit(hostOf(sender.tab.url), "fail", null);
+            logVisit(hostOf(sender.tab.url), "fail", null, "com");
             if(tabStatusMap.get(sender.tab.id) !== STATUS.HANDLED) {
                 setBadgeCheckmark("\u2717", sender.tab.id);
                 tabStatusMap.set(sender.tab.id, STATUS.ERROR);
@@ -66,7 +66,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
             tabStatusMap.set(sender.tab.id, STATUS.HANDLED);
 
 
-            logVisit(json.url, "ok", json.cmp);
+            logVisit(json.url, "ok", json.cmp, "com");
             scheduleAfterSnapshot(sender.tab, json.cmp);
 
             // 처리 시각만 저장 (오늘 처리 건수 표시에 사용, 사이트 주소는 넣지 않음)
@@ -112,9 +112,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
 });
 
 // 사이트별 처리 결과 기록. r: "ok" 처리 완료, "fail" 처리 못 함, "none" 쿠키 창 못 찾음
+// engine: 처리한 엔진. "ac" autoconsent, "com" Consent-O-Matic, 못 찾은 경우는 없음
 // 같은 사이트의 같은 결과는 6시간 안에 1번만 기록 (쓰기는 차례대로 처리)
 let visitQueue = Promise.resolve();
-function logVisit(host, r, cmp) {
+function logVisit(host, r, cmp, engine) {
     if (!host) return;
     visitQueue = visitQueue.then(() => new Promise((resolve) => {
         chrome.storage.local.get({ visitLog: [], logEnabled: false }, ({ visitLog, logEnabled }) => {
@@ -123,7 +124,7 @@ function logVisit(host, r, cmp) {
             const now = Date.now();
             const dup = visitLog.some((e) => e.h === host && e.r === r && now - e.t < 6 * 3600 * 1000);
             if (dup) return resolve();
-            visitLog.push({ h: host, t: now, r: r, c: cmp });
+            visitLog.push({ h: host, t: now, r: r, c: cmp, e: engine || null });
             chrome.storage.local.set({ visitLog: visitLog.slice(-2000) }, resolve);
         });
     }));
@@ -337,7 +338,7 @@ async function handleAutoconsent(message, sender) {
         case "optOutResult":
         case "optInResult": {
             if (!message.result) {
-                logVisit(site, "fail", message.cmp);
+                logVisit(site, "fail", message.cmp, "ac");
                 notice(tabId, "cancel");
                 if (tabStatusMap.get(tabId) !== STATUS.HANDLED) {
                     setBadgeCheckmark("✗", tabId);
@@ -350,7 +351,7 @@ async function handleAutoconsent(message, sender) {
         case "autoconsentDone": {
             setBadgeCheckmark("✔", tabId);
             tabStatusMap.set(tabId, STATUS.HANDLED);
-            logVisit(site, "ok", message.cmp);
+            logVisit(site, "ok", message.cmp, "ac");
             chrome.storage.local.get({ handledLog: [] }, ({ handledLog }) => {
                 handledLog.push({ t: Date.now() });
                 chrome.storage.local.set({ handledLog: handledLog.slice(-300) });
