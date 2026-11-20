@@ -1,0 +1,82 @@
+/* 쿠키 창을 가리는 규칙 (원본 동작 부분이 사용) */
+.ConsentOMatic-CMP-Hider {
+    opacity: 0 !important;
+}
+
+/* 처리 중 작은 알림: 화면 왼쪽 아래 */
+.ConsentOMatic-Progress-Dialog-Modal {
+    position: fixed !important;
+    left: 16px !important;
+    bottom: 16px !important;
+    z-index: 2147483646 !important;
+    transform: translateY(90px);
+    transition: transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+    pointer-events: none;
+
+    &.ConsentOMatic-Progress-Started {
+        transform: none;
+    }
+    &.ConsentOMatic-Progress-Complete {
+        transform: translateY(90px);
+    }
+}
+
+/* 원본의 쿠키 창 축소 상자는 사용하지 않음 */
+.ConsentOMatic-Progres-Preview {
+    display: none !important;
+}
+
+.ConsentOMatic-Progress-Dialog {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 8px 16px 8px 10px;
+    border: 0;
+    border-radius: 20px;
+    background: #0c0d10;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+
+    &:before {
+        content: "";
+        flex: none;
+        box-sizing: border-box;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 3px solid #343a44;
+        border-top-color: #e8500a;
+        animation: cookiehelper-spin 0.7s linear infinite;
+    }
+
+    p {
+        margin: 0 !important;
+        padding: 0 !important;
+        color: #ece8df !important;
+        font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        line-height: 1.4 !important;
+        letter-spacing: 0 !important;
+        white-space: nowrap;
+    }
+}
+
+/* 처리 완료: 돌아가는 표시를 체크로 교체 */
+.CookieHelper-Done .ConsentOMatic-Progress-Dialog:before {
+    border: 0;
+    animation: none;
+    background: #e8500a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9.5l2.6 2.6L13 6.6' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@keyframes cookiehelper-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

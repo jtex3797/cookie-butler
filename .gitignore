@@ -1,0 +1,6 @@
+# 받아 온 원본(Consent-O-Matic), 필요하면 다시 받음
+reference/
+
+# 설치 도구와 빌드 결과
+node_modules/
+build/

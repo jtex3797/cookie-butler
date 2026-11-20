@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>처리 중 표시 비교</title>
+<style>
+:root{--bg:#121418;--panel:#1c2026;--raise:#282d35;--raise2:#343a44;--text:#ece8df;--mute:#9299a3;--acc:#e8500a;--acc2:#ff6a1f;--page:#23272e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;padding:24px 16px 60px;line-height:1.5}
+h1{font-size:22px;margin-bottom:4px}
+.lead{color:var(--mute);font-size:14px;margin-bottom:14px}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+.btn{background:var(--acc);color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:600;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:18px}
+.col{background:var(--panel);border-radius:14px;padding:16px}
+.col h2{font-size:18px;display:flex;align-items:center;gap:8px}
+.tag{background:var(--raise2);border-radius:6px;padding:1px 9px;font-size:15px}
+.tag.new{background:var(--acc);color:#fff}
+.col p.d{color:var(--mute);font-size:13px;margin:4px 0 12px;min-height:40px}
+.win{position:relative;height:420px;background:var(--page);border-radius:10px;overflow:hidden}
+.bar{height:42px;background:#0c0d10;display:flex;align-items:center;gap:8px;padding:0 10px}
+.url{flex:1;background:var(--raise);border-radius:16px;padding:4px 12px;font-size:12px;color:var(--mute)}
+.ext{position:relative;width:30px;height:30px;border-radius:8px;background:var(--raise2);display:grid;place-items:center}
+.ext svg{width:18px;height:18px}
+.badge{position:absolute;right:-5px;top:-5px;background:var(--acc);color:#fff;font-size:10px;font-weight:700;border-radius:8px;width:16px;height:16px;display:grid;place-items:center;transform:scale(0);transition:transform .3s cubic-bezier(.3,1.8,.5,1)}
+.badge.show{transform:scale(1)}
+.badge::after{content:"";width:7px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px)}
+.page{position:absolute;inset:42px 0 0 0;padding:16px;overflow:hidden}
+.sk{height:12px;border-radius:6px;background:#2e333c;margin-bottom:10px}
+.sk.b{height:80px;width:55%;border-radius:8px}
+.banner{position:absolute;left:10px;right:10px;bottom:10px;background:#f0ede6;color:#222;border-radius:10px;padding:12px;font-size:12px;transform:translateY(130%);transition:transform .45s cubic-bezier(.2,.9,.3,1.2)}
+.banner.show{transform:none}
+.banner.hide{visibility:hidden}
+.banner b{display:block;font-size:13px;margin-bottom:6px}
+.banner span{display:inline-block;background:#333;color:#fff;border-radius:5px;padding:3px 9px;margin-right:5px;font-size:11px}
+.banner span.g{background:#c9c5bc;color:#333}
+
+/* 원본 재현: 원본 꾸밈 파일(content.scss)의 값 사용 */
+.om{position:absolute;right:0;bottom:0;width:200px;opacity:0;transition:opacity 1s ease-in-out;pointer-events:none}
+.om.start{opacity:1}
+.om.done{opacity:0}
+.om .pv{height:120px;background:rgba(0,48,154,.2);border:1px solid #00008b12;border-bottom:0;transform:scaleY(0);transform-origin:center bottom;transition:transform .3s ease-out;display:grid;place-items:center;padding:8px}
+.om.pip .pv{transform:scaleY(1)}
+.om.done .pv{transform:scaleY(0)}
+.om .pv .mini{background:#f0ede6;color:#222;border-radius:4px;padding:5px;font-size:6px;width:100%}
+.om .pv .mini i{display:inline-block;background:#333;border-radius:2px;width:26px;height:7px;margin:3px 2px 0 0}
+.om .dg{position:relative;height:48px;margin-bottom:16px;display:flex;align-items:center;gap:8px;padding:8px;box-shadow:0 0 3rem rgba(47,51,70,.637);background:linear-gradient(to right,#000 0%,rgb(0,48,154) 40%,rgb(0,22,91) 60%);background-size:400% 400%;animation:omp 5s -1s alternate infinite both;overflow:hidden}
+@keyframes omp{from{background-position:90% 50%}to{background-position:0% 50%}}
+.om .dg::after{content:"";background:green;height:3px;position:absolute;top:0;left:0;transition:width .25s ease-out;width:calc(var(--p,0)*100%)}
+.om .dg em{width:30px;height:30px;border-radius:50%;background:#11378F;flex:none;display:grid;place-items:center;color:#FDD70A;font-style:normal;font-size:16px}
+.om .dg p{color:#fff;font-size:12px;font-weight:300;font-family:sans-serif}
+
+/* 안 1 */
+.pill{position:absolute;left:12px;bottom:14px;background:#0c0d10;border-radius:20px;padding:7px 14px 7px 10px;font-size:12px;font-weight:600;display:flex;gap:7px;align-items:center;transform:translateY(70px);transition:transform .35s cubic-bezier(.2,1.4,.4,1)}
+.pill.show{transform:none}
+.pill i{width:16px;height:16px;border-radius:50%;border:3px solid var(--raise2);border-top-color:var(--acc);animation:spin .7s linear infinite}
+.pill.ok i{border:0;background:var(--acc);animation:none;display:grid;place-items:center}
+.pill.ok i::after{content:"";width:7px;height:4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.notes{margin-top:12px;font-size:13px;color:var(--mute);padding-left:16px}
+</style>
+</head>
+<body>
+<h1>처리 중 표시 비교</h1>
+<p class="lead">쿠키 창을 대신 처리하는 2~3초 동안 페이지에 보이는 모습. 왼쪽이 지금 상태(원본 그대로).</p>
+<button class="btn" id="again">다시 보기</button>
+
+<div class="grid">
+  <section class="col">
+    <h2><span class="tag">지금</span>원본 진행 표시</h2>
+    <p class="d">오른쪽 아래에 파란 막대와 영어 문구, 그 위에 쿠키 창을 작게 줄여 보여 주는 상자. 끝나면 1초에 걸쳐 흐려짐.</p>
+    <div class="win" id="w0">
+      <div class="bar"><div class="url">news.example.kr</div><div class="ext"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#e8500a"/><circle cx="7" cy="8" r="1.6" fill="#121418"/><circle cx="12.5" cy="12" r="1.6" fill="#121418"/></svg><b class="badge"></b></div></div>
+      <div class="page"><div class="sk b"></div><div class="sk" style="width:80%"></div><div class="sk" style="width:60%"></div>
+        <div class="banner"><b>이 사이트는 쿠키를 사용합니다</b><span>모두 허용</span><span class="g">설정</span></div>
+        <div class="om"><div class="pv"><div class="mini">이 사이트는 쿠키를 사용합니다<br><i></i><i></i></div></div><div class="dg"><em>*</em><p>Handling cookiebot...</p></div></div>
+      </div>
+    </div>
+    <ul class="notes"><li>무엇을 누르는지 과정이 보임</li><li>영어 문구, 파란 그라데이션, 화면 구석을 꽤 차지</li></ul>
+  </section>
+
+  <section class="col">
+    <h2><span class="tag new">안 1</span>작은 알림</h2>
+    <p class="d">쿠키 창은 바로 가리고, 왼쪽 아래에 "처리 중"에서 "닫음"으로 바뀌는 작은 알림만 표시.</p>
+    <div class="win" id="w1">
+      <div class="bar"><div class="url">news.example.kr</div><div class="ext"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#e8500a"/><circle cx="7" cy="8" r="1.6" fill="#121418"/><circle cx="12.5" cy="12" r="1.6" fill="#121418"/></svg><b class="badge"></b></div></div>
+      <div class="page"><div class="sk b"></div><div class="sk" style="width:80%"></div><div class="sk" style="width:60%"></div>
+        <div class="banner"><b>이 사이트는 쿠키를 사용합니다</b><span>모두 허용</span><span class="g">설정</span></div>
+        <div class="pill"><i></i><span>쿠키 창 처리 중</span></div>
+      </div>
+    </div>
+    <ul class="notes"><li>한국어, 화면을 거의 안 가림</li><li>과정은 안 보이고 결과만 표시</li></ul>
+  </section>
+
+  <section class="col">
+    <h2><span class="tag new">안 2</span>표시 없음</h2>
+    <p class="d">쿠키 창은 바로 가리고 페이지에는 아무것도 안 띄움. 주소창 옆 아이콘에 체크만 표시.</p>
+    <div class="win" id="w2">
+      <div class="bar"><div class="url">news.example.kr</div><div class="ext"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#e8500a"/><circle cx="7" cy="8" r="1.6" fill="#121418"/><circle cx="12.5" cy="12" r="1.6" fill="#121418"/></svg><b class="badge"></b></div></div>
+      <div class="page"><div class="sk b"></div><div class="sk" style="width:80%"></div><div class="sk" style="width:60%"></div>
+        <div class="banner"><b>이 사이트는 쿠키를 사용합니다</b><span>모두 허용</span><span class="g">설정</span></div>
+      </div>
+    </div>
+    <ul class="notes"><li>가장 조용함</li><li>처리됐는지 알려면 아이콘을 봐야 함</li></ul>
+  </section>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+let timers=[];const later=(f,ms)=>timers.push(setTimeout(f,ms));
+function play(){
+  timers.forEach(clearTimeout);timers=[];
+  $$(".banner").forEach(b=>b.className="banner");$$(".badge").forEach(b=>b.classList.remove("show"));
+  const om=$(".om"),dg=$(".om .dg"),pill=$(".pill");
+  om.className="om";dg.style.setProperty("--p",0);pill.className="pill";$("span",pill).textContent="쿠키 창 처리 중";
+  later(()=>$$(".banner").forEach(b=>b.classList.add("show")),500);
+  later(()=>{
+    // 원본: 진행 막대 표시, 쿠키 창을 작은 상자로 옮김
+    om.classList.add("start");
+    later(()=>{om.classList.add("pip");$("#w0 .banner").classList.add("hide")},300);
+    [0.25,0.5,0.75,1].forEach((p,i)=>later(()=>dg.style.setProperty("--p",p),500+i*450));
+    later(()=>{om.classList.add("done");$("#w0 .badge").classList.add("show")},2400);
+    // 안 1
+    $("#w1 .banner").classList.add("hide");pill.classList.add("show");
+    later(()=>{pill.classList.add("ok");$("span",pill).textContent="쿠키 창 닫음, 광고와 통계 거부";$("#w1 .badge").classList.add("show")},1900);
+    later(()=>pill.classList.remove("show"),4300);
+    // 안 2
+    $("#w2 .banner").classList.add("hide");
+    later(()=>$("#w2 .badge").classList.add("show"),1900);
+  },1700);
+  later(play,8000);
+}
+$("#again").onclick=play;play();
+</script>
+</body>
+</html>

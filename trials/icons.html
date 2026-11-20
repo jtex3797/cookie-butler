@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>쿠키 도우미 아이콘 시안</title>
+<style>
+:root{--bg:#121418;--panel:#1c2026;--raise:#282d35;--text:#ece8df;--mute:#9299a3;--acc:#e8500a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;padding:24px 16px 60px;line-height:1.5}
+h1{font-size:22px;margin-bottom:4px}
+.lead{color:var(--mute);font-size:14px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.col{background:var(--panel);border-radius:14px;padding:16px}
+.col h2{font-size:18px;display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.tag{background:var(--acc);color:#fff;border-radius:6px;padding:1px 9px;font-size:15px}
+.col p{color:var(--mute);font-size:13px;min-height:40px;margin-bottom:12px}
+.big{display:grid;place-items:center;background:var(--raise);border-radius:12px;padding:22px;margin-bottom:12px}
+.sizes{display:flex;align-items:flex-end;gap:14px;margin-bottom:12px}
+.sizes div{text-align:center;font-size:11px;color:var(--mute)}
+.sizes svg{display:block;margin:0 auto 4px}
+.tb{display:flex;align-items:center;gap:8px;border-radius:8px;padding:7px 10px;margin-bottom:6px;font-size:11px}
+.tb .u{flex:1;border-radius:12px;height:20px}
+.tb.dark{background:#0c0d10;color:#9299a3}.tb.dark .u{background:#282d35}
+.tb.light{background:#dfe1e5;color:#555}.tb.light .u{background:#fff}
+.tb svg{flex:none}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <mask id="bite"><rect width="64" height="64" fill="#fff"/><circle cx="52" cy="11" r="12" fill="#000"/><circle cx="60" cy="28" r="7" fill="#000"/></mask>
+    <!-- A: 한 입 베어 문 쿠키 -->
+    <symbol id="iA" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="29" fill="#e8500a" mask="url(#bite)"/>
+      <circle cx="22" cy="24" r="5.5" fill="#2a1206"/><circle cx="38" cy="40" r="6" fill="#2a1206"/><circle cx="20" cy="43" r="4" fill="#2a1206"/><circle cx="35" cy="20" r="3.5" fill="#2a1206"/>
+    </symbol>
+    <!-- B: 쿠키와 체크 -->
+    <symbol id="iB" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="29" fill="#e8500a"/>
+      <circle cx="17" cy="20" r="4.5" fill="#a83505"/><circle cx="48" cy="46" r="4.5" fill="#a83505"/><circle cx="46" cy="15" r="3.5" fill="#a83505"/><circle cx="16" cy="45" r="3.5" fill="#a83505"/>
+      <path d="M17 33l11 11 20-23" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- C: 방패와 쿠키 -->
+    <symbol id="iC" viewBox="0 0 64 64">
+      <path d="M32 3 57 11v19c0 16-10 26-25 31C17 56 7 46 7 30V11z" fill="#e8500a"/>
+      <circle cx="32" cy="30" r="14" fill="#1a1c20"/>
+      <circle cx="27" cy="25" r="3.2" fill="#e8500a"/><circle cx="37" cy="33" r="3.5" fill="#e8500a"/><circle cx="27" cy="36" r="2.4" fill="#e8500a"/>
+    </symbol>
+    <!-- D: 창 닫기 -->
+    <symbol id="iD" viewBox="0 0 64 64">
+      <rect x="3" y="3" width="58" height="58" rx="15" fill="#e8500a"/>
+      <rect x="11" y="15" width="42" height="34" rx="7" fill="#fff"/>
+      <path d="M24 24l16 16M40 24 24 40" fill="none" stroke="#1a1c20" stroke-width="6.5" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<h1>쿠키 도우미 아이콘 시안 4개</h1>
+<p class="lead">큰 그림, 실제 쓰이는 크기 4종, 주소창 옆에 놓였을 때 모습(어두운 창, 밝은 창).</p>
+
+<div class="grid">
+  <section class="col">
+    <h2><span class="tag">A</span>한 입 베어 문 쿠키</h2>
+    <p>쿠키라는 것이 가장 바로 읽힘. "먹어 치웠다"는 느낌.</p>
+    <div class="big"><svg width="128" height="128"><use href="#iA"/></svg></div>
+    <div class="sizes"><div><svg width="96" height="96"><use href="#iA"/></svg>96</div><div><svg width="48" height="48"><use href="#iA"/></svg>48</div><div><svg width="32" height="32"><use href="#iA"/></svg>32</div><div><svg width="16" height="16"><use href="#iA"/></svg>16</div></div>
+    <div class="tb dark"><div class="u"></div><svg width="18" height="18"><use href="#iA"/></svg></div>
+    <div class="tb light"><div class="u"></div><svg width="18" height="18"><use href="#iA"/></svg></div>
+  </section>
+
+  <section class="col">
+    <h2><span class="tag">B</span>쿠키와 체크</h2>
+    <p>"쿠키 처리 완료"라는 뜻. 작은 크기에서도 체크가 또렷함.</p>
+    <div class="big"><svg width="128" height="128"><use href="#iB"/></svg></div>
+    <div class="sizes"><div><svg width="96" height="96"><use href="#iB"/></svg>96</div><div><svg width="48" height="48"><use href="#iB"/></svg>48</div><div><svg width="32" height="32"><use href="#iB"/></svg>32</div><div><svg width="16" height="16"><use href="#iB"/></svg>16</div></div>
+    <div class="tb dark"><div class="u"></div><svg width="18" height="18"><use href="#iB"/></svg></div>
+    <div class="tb light"><div class="u"></div><svg width="18" height="18"><use href="#iB"/></svg></div>
+  </section>
+
+  <section class="col">
+    <h2><span class="tag">C</span>방패와 쿠키</h2>
+    <p>"막아 준다"는 뜻. 보안 프로그램 느낌이 남.</p>
+    <div class="big"><svg width="128" height="128"><use href="#iC"/></svg></div>
+    <div class="sizes"><div><svg width="96" height="96"><use href="#iC"/></svg>96</div><div><svg width="48" height="48"><use href="#iC"/></svg>48</div><div><svg width="32" height="32"><use href="#iC"/></svg>32</div><div><svg width="16" height="16"><use href="#iC"/></svg>16</div></div>
+    <div class="tb dark"><div class="u"></div><svg width="18" height="18"><use href="#iC"/></svg></div>
+    <div class="tb light"><div class="u"></div><svg width="18" height="18"><use href="#iC"/></svg></div>
+  </section>
+
+  <section class="col">
+    <h2><span class="tag">D</span>창 닫기</h2>
+    <p>"뜨는 창을 닫아 준다"는 뜻. 쿠키 그림은 없음.</p>
+    <div class="big"><svg width="128" height="128"><use href="#iD"/></svg></div>
+    <div class="sizes"><div><svg width="96" height="96"><use href="#iD"/></svg>96</div><div><svg width="48" height="48"><use href="#iD"/></svg>48</div><div><svg width="32" height="32"><use href="#iD"/></svg>32</div><div><svg width="16" height="16"><use href="#iD"/></svg>16</div></div>
+    <div class="tb dark"><div class="u"></div><svg width="18" height="18"><use href="#iD"/></svg></div>
+    <div class="tb light"><div class="u"></div><svg width="18" height="18"><use href="#iD"/></svg></div>
+  </section>
+</div>
+</body>
+</html>

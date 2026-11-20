@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{--panel:#1c2026;--raise:#282d35;--raise2:#343a44;--text:#ece8df;--mute:#9299a3;--acc:#e8500a;--acc2:#ff6a1f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:290px;background:var(--panel);color:var(--text);font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:13px;line-height:1.5;padding:16px}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+h3{font-size:13px;color:var(--mute);font-weight:600;margin-bottom:8px}
+.num{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.num b{font-size:46px;line-height:1;font-variant-numeric:tabular-nums;display:inline-block;animation:tick .4s}
+@keyframes tick{0%{transform:translateY(-14px);color:var(--acc2)}100%{transform:none}}
+.num span{color:var(--mute);font-size:12px}
+.status{font-size:12px;color:var(--mute);margin-bottom:14px;min-height:18px}
+.status.done{color:var(--acc2);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:10px 0 6px}
+.tile{background:var(--raise);border-radius:8px;padding:10px 2px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--mute);transition:background .2s,color .2s,transform .2s}
+.tile em{display:block;font-style:normal;font-size:10px;font-weight:400;margin-top:2px}
+.tile.on{background:var(--acc);color:#fff;transform:translateY(-3px)}
+.tile:hover{background:var(--raise2)}
+.tile.on:hover{background:var(--acc2)}
+.tile:active{transform:scale(.92)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;cursor:grab}
+input[type=range]:active{cursor:grabbing}
+input[type=range]::-webkit-slider-runnable-track{height:12px;border-radius:6px;background:var(--raise2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:9px;background:var(--acc);margin-top:-9px;box-shadow:0 2px 0 #8f3005}
+.lv{font-size:15px;font-weight:700;margin-top:2px}
+.lv small{display:block;color:var(--mute);font-weight:400;font-size:12px}
+.note{font-size:11px;color:var(--mute);margin-top:6px;visibility:hidden}
+.note.show{visibility:visible}
+.site{display:flex;align-items:center;gap:8px;margin-top:12px;background:var(--raise);border-radius:8px;padding:9px 10px;font-size:12px}
+.site .t{flex:1;min-width:0}
+.site .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.site .t small{color:var(--mute)}
+.sw{width:46px;height:26px;border-radius:13px;background:var(--raise2);position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#c9cdd3;transition:transform .2s cubic-bezier(.3,1.6,.5,1),background .2s}
+.sw.on{background:var(--acc)}
+.sw.on::after{transform:translateX(20px);background:#fff}
+.sw:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+  <div class="num"><b id="cnt">0</b><span>오늘 대신 닫은 창</span></div>
+  <div class="status" id="status"></div>
+
+  <h3>얼마나 허용할지</h3>
+  <input type="range" id="level" min="0" max="3" step="1" value="0" aria-label="쿠키 허용 범위">
+  <div class="tiles" id="tiles">
+    <button class="tile">필수<em>로그인 등</em></button>
+    <button class="tile">기능<em>언어 설정</em></button>
+    <button class="tile">통계<em>방문 집계</em></button>
+    <button class="tile">광고<em>맞춤 광고</em></button>
+  </div>
+  <div class="lv" id="lv"></div>
+  <div class="note" id="note">다음에 여는 페이지부터 적용</div>
+
+  <div class="site">
+    <div class="t"><b id="host"></b><small id="hostSub">이 사이트에서 사용</small></div>
+    <button class="sw" id="siteSw" aria-label="이 사이트에서 사용"></button>
+  </div>
+  <script src="ui.js"></script>
+</body>
+</html>
