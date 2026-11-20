@@ -47,3 +47,27 @@ const usercentricsV3 = {
 export default {
     "usercentrics_v3": usercentricsV3
 };
+
+// 원본 규칙을 통째로 바꾸지 않고 부족한 부분만 덧붙임 (원본이 갱신돼도 계속 따라감)
+export function patchRules(config) {
+    // didomi: 종류를 하나라도 고르지 않으면 "Save" 버튼이 눌리지 않음.
+    // 원본은 이름을 아는 종류만 골라서, 모르는 종류가 있으면 저장을 못 하고 창이 남음.
+    // 먼저 맨 위의 일괄 버튼으로 전부 고른 뒤 종류별 선택을 진행하게 함.
+    // 확인: didomi.io (2026-11-21), 일괄 "Disagree" 클릭 후 Save 버튼 활성화
+    try {
+        const doConsent = config["didomi.io"].methods.find((m) => m.name === "DO_CONSENT");
+        const list = doConsent.action.actions;
+        const at = list.findIndex((a) => a.type === "waitcss");
+        if (at >= 0 && !list.some((a) => a.cookieHelper)) {
+            const bulk = (n) => ({
+                type: "click",
+                target: { selector: `.didomi-consent-popup-container-click-all .didomi-components-radio__option:nth-child(${n})` }
+            });
+            list.splice(at + 1, 0,
+                { type: "ifallowall", cookieHelper: true, trueAction: bulk(2), falseAction: bulk(1) },
+                { type: "wait", waitTime: 150 }
+            );
+        }
+    } catch (e) { /* 원본에 해당 규칙이 없거나 모양이 바뀐 경우 건너뜀 */ }
+    return config;
+}

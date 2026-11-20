@@ -1,6 +1,6 @@
 import GDPRConfig from "./GDPRConfig.js";
 import ConsentEngine from "./ConsentEngine.js";
-import extraRules from "./extraRules.js";
+import extraRules, { patchRules } from "./extraRules.js";
 
 async function contentScriptRunner() {
     if (document.contentType!=="text/html") return;
@@ -32,7 +32,7 @@ async function contentScriptRunner() {
                         delete customRules["$schema"];
         
                         // Concat rule-lists to engine config in order
-                        let config = Object.assign({}, ...fetchedRules, extraRules, customRules);
+                        let config = patchRules(Object.assign({}, ...fetchedRules, extraRules, customRules));
         
                         GDPRConfig.getConsentValues().then((consentTypes)=>{
                             GDPRConfig.getDebugValues().then((debugValues)=>{
