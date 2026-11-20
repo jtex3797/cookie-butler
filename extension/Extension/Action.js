@@ -872,7 +872,7 @@ function hideSmoothly(target) {
             }
             target.cookieHelperAnims = boxes.map((el) => el.animate(
                 [{ scale: 1 }, { scale: 0.82 }],
-                { duration: 320, easing: "cubic-bezier(0.5, 0, 0.9, 0.6)", fill: "forwards" }
+                { duration: 800, easing: "cubic-bezier(0.5, 0, 0.9, 0.6)", fill: "forwards" }
             ));
         } catch (e) { /* 줄이기 실패 시 흐려지기만 함 */ }
     }

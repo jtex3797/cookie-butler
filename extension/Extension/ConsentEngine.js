@@ -282,7 +282,7 @@ export default class ConsentEngine {
                                     await cmp.runMethod("HIDE_CMP", self.consentTypes);
                                     // 사라지는 움직임이 끝난 뒤 버튼을 누름 (사이트가 창을 먼저 닫아 버리면 움직임이 끊김)
                                     if (cmp.hiddenTargets.length > 0) {
-                                        await new Promise((resolve) => setTimeout(resolve, 340));
+                                        await new Promise((resolve) => setTimeout(resolve, 820));
                                     }
 
                                     if (ConsentEngine.debugValues.debugLog) {
