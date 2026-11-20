@@ -30,4 +30,9 @@ npm run build
 
 ## 원작자 표기
 
-쿠키 동의 창을 찾고 처리하는 동작 부분과 사이트 규칙은 [Consent-O-Matic](https://github.com/cavi-au/Consent-O-Matic)(CAVI, Aarhus University, MIT License)에서 가져왔습니다. 원본의 저작권 표시와 허가 조건은 `extension/LICENSE`에 있습니다. 화면, 문구, 아이콘, 기록 기능은 새로 만들었습니다.
+쿠키 동의 창을 찾고 처리하는 부분은 두 가지 공개 프로젝트를 함께 사용합니다.
+
+- [autoconsent](https://github.com/duckduckgo/autoconsent)(DuckDuckGo, MPL-2.0): 규칙이 많고 "전부 거부"와 "전부 허용"을 처리합니다. 수정 없이 라이브러리로 사용하며, 허가 조건은 묶음의 `autoconsent/LICENSE.txt`에 있습니다.
+- [Consent-O-Matic](https://github.com/cavi-au/Consent-O-Matic)(CAVI, Aarhus University, MIT License): 쿠키 종류별 선택(기능까지, 통계까지)을 처리합니다. 동작 부분을 가져와 고쳐 썼으며, 원본의 저작권 표시와 허가 조건은 `extension/LICENSE`에 있습니다.
+
+허용 범위가 "필수만"이나 "전부 허용"이면 autoconsent를 먼저, "기능까지"나 "통계까지"면 Consent-O-Matic을 먼저 쓰고, 먼저 쓴 쪽이 쿠키 창을 못 찾으면 다른 쪽으로 한 번 더 찾습니다. 화면, 문구, 아이콘, 기록 기능은 새로 만들었습니다.

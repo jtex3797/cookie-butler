@@ -1,4 +1,5 @@
 import GDPRConfig from './GDPRConfig.js';
+import { filterCompactRules, evalSnippets } from "@duckduckgo/autoconsent";
 
 const STATUS = {
     "INIT": 0,
@@ -9,7 +10,11 @@ const STATUS = {
 }
 
 chrome.runtime.onMessage.addListener(function (message, sender, reply) {
-    console.log("Got msg", message);
+    // autoconsent가 보내는 메시지는 객체 형태
+    if (message && typeof message === "object" && typeof message.type === "string") {
+        handleAutoconsent(message, sender).catch((e) => console.log("autoconsent 처리 실패:", e));
+        return false;
+    }
     try {
     switch (message.split("|")[0]) {
         case "GetTabUrl": {
@@ -127,6 +132,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
         case "CMPShowing": {
             // 동의 창을 처리하기 직전의 쿠키 상태 기록
             const tab = sender.tab;
+            popupSeenTabs.add(tab.id);
             chrome.storage.local.get({ logEnabled: false }, ({ logEnabled }) => {
                 // 기록을 켜지 않았으면 쿠키를 읽지 않음
                 if (!logEnabled) return reply();
@@ -136,6 +142,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
                 }).catch(() => reply());
             });
             return true;
+        }
+
+        case "PopupSeen": {
+            reply(sender.tab ? popupSeenTabs.has(sender.tab.id) : false);
+            return false;
         }
 
         case "GetStatus": {
@@ -317,7 +328,9 @@ function fetchRules(forceUpdate) {
 let tabStatusMap = new Map();
 
 chrome.tabs.onUpdated.addListener((tabId, info, tab)=>{
-    if(info.status != null && info.status === "Loading") {
+    // 원본은 "Loading"과 비교해 한 번도 맞지 않았음. Chrome이 주는 값은 소문자 "loading"
+    if(info.status != null && info.status === "loading") {
+        popupSeenTabs.delete(tabId);
         setBadgeCheckmark("", tabId);
         tabStatusMap.set(tabId, STATUS.INIT);
     }
@@ -355,3 +368,141 @@ async function fetchRulesList(ruleList) {
     return null;
 }
 
+
+// ---- DuckDuckGo autoconsent 연결 ----
+// 이 탭에서 쿠키 창을 찾은 적이 있는지 (두 엔진이 같은 창을 동시에 다루지 않게 하는 데 사용)
+const popupSeenTabs = new Set();
+
+// 추정으로 버튼을 고르는 기능(heuristic)은 엉뚱한 버튼을 누를 위험이 있어 끔.
+// autoAction을 비워 두면 창을 찾은 뒤 배경의 지시를 기다림 (그 사이에 처리 전 쿠키를 기록)
+const AUTOCONSENT_CONFIG = {
+    enabled: true,
+    autoAction: null,
+    disabledCmps: [],
+    enablePrehide: true,
+    enableCosmeticRules: true,
+    enableGeneratedRules: true,
+    detectRetries: 20,
+    isMainWorld: false,
+    prehideTimeout: 2000,
+    enableHeuristicDetection: false,
+    enablePopupMutationObserver: false,
+    visualTest: false,
+    logs: { lifecycle: false, rulesteps: false, detectionsteps: false, evals: false, errors: false, messages: false, waits: false },
+    performanceLoggingEnabled: false,
+    heuristicMode: "off"
+};
+
+// 묶음에 들어 있는 규칙 파일. 배경이 깨어 있는 동안만 기억
+const ruleFiles = {};
+function loadRuleFile(name) {
+    if (!ruleFiles[name]) {
+        ruleFiles[name] = fetch(chrome.runtime.getURL("autoconsent/" + name)).then((res) => res.json());
+    }
+    return ruleFiles[name];
+}
+
+// 전부 허용 단계면 optIn, 그 밖에는 optOut
+async function autoconsentAction() {
+    const v = await GDPRConfig.getConsentValues();
+    return (v.D || v.E || v.F || v.X) ? "optIn" : "optOut";
+}
+
+function sendToFrame(tabId, frameId, message) {
+    try {
+        chrome.tabs.sendMessage(tabId, message, { frameId: frameId }, () => void chrome.runtime.lastError);
+    } catch (e) { /* 탭이 닫힌 경우 */ }
+}
+
+// 작은 알림은 맨 위 페이지에 표시
+function notice(tabId, phase, text) {
+    sendToFrame(tabId, 0, { type: "cookieHelperNotice", phase: phase, text: text });
+}
+
+async function handleAutoconsent(message, sender) {
+    if (!sender.tab) return;
+    const tabId = sender.tab.id;
+    const frameId = sender.frameId;
+    const site = hostOf(sender.tab.url);
+
+    switch (message.type) {
+        case "init": {
+            let rules;
+            if ((await autoconsentAction()) === "optIn") {
+                // 허용 쪽 규칙은 전체 규칙 파일에만 있음
+                rules = { autoconsent: (await loadRuleFile("rules.json")).autoconsent };
+            } else {
+                rules = {
+                    autoconsent: [],
+                    compact: filterCompactRules(await loadRuleFile("compact-rules.json"), {
+                        url: sender.url || sender.tab.url,
+                        mainFrame: frameId === 0
+                    })
+                };
+            }
+            sendToFrame(tabId, frameId, { type: "initResp", rules: rules, config: AUTOCONSENT_CONFIG });
+            break;
+        }
+
+        case "eval": {
+            // 일부 규칙은 페이지 쪽 코드 실행이 필요. 묶음 안에 미리 들어 있는 함수만 실행
+            let result = false;
+            try {
+                const snippet = message.snippetId && evalSnippets[message.snippetId];
+                if (snippet) {
+                    const [res] = await chrome.scripting.executeScript({
+                        target: { tabId: tabId, frameIds: [frameId] },
+                        world: "MAIN",
+                        func: snippet
+                    });
+                    result = res ? res.result : false;
+                }
+            } catch (e) { /* 실행할 수 없는 페이지 */ }
+            sendToFrame(tabId, frameId, { type: "evalResp", id: message.id, result: result });
+            break;
+        }
+
+        case "popupFound": {
+            popupSeenTabs.add(tabId);
+            notice(tabId, "start", "쿠키 창 처리 중");
+            const { logEnabled } = await chrome.storage.local.get({ logEnabled: false });
+            if (logEnabled) {
+                try {
+                    const list = await snapshotCookies(sender.tab);
+                    pendingCookies.set(tabId, { h: site, t: Date.now(), before: list });
+                } catch (e) { /* 쿠키를 읽을 수 없는 경우 기록만 건너뜀 */ }
+            }
+            sendToFrame(tabId, frameId, { type: await autoconsentAction() });
+            break;
+        }
+
+        case "optOutResult":
+        case "optInResult": {
+            if (!message.result) {
+                logVisit(site, "fail", message.cmp);
+                notice(tabId, "cancel");
+                if (tabStatusMap.get(tabId) !== STATUS.HANDLED) {
+                    setBadgeCheckmark("✗", tabId);
+                    tabStatusMap.set(tabId, STATUS.ERROR);
+                }
+            }
+            break;
+        }
+
+        case "autoconsentDone": {
+            setBadgeCheckmark("✔", tabId);
+            tabStatusMap.set(tabId, STATUS.HANDLED);
+            logVisit(site, "ok", message.cmp);
+            chrome.storage.local.get({ handledLog: [] }, ({ handledLog }) => {
+                handledLog.push({ t: Date.now() });
+                chrome.storage.local.set({ handledLog: handledLog.slice(-300) });
+            });
+            scheduleAfterSnapshot(sender.tab, message.cmp);
+            const action = await autoconsentAction();
+            notice(tabId, "done", message.isCosmetic
+                ? "쿠키 창 가림 (거부 버튼 없는 창)"
+                : action === "optIn" ? "쿠키 창 닫음, 전부 허용" : "쿠키 창 닫음, 필수만 허용");
+            break;
+        }
+    }
+}

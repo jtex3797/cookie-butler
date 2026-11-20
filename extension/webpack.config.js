@@ -81,6 +81,16 @@ module.exports = env=>({
         // 원본(Consent-O-Matic)의 저작권 표시와 허가 조건을 묶음에 포함
         from: "LICENSE",
         to: "LICENSE.txt"
+    }, {
+        // DuckDuckGo autoconsent의 규칙 파일과 허가 조건(MPL-2.0)
+        from: "node_modules/@duckduckgo/autoconsent/rules/compact-rules.json",
+        to: "autoconsent/compact-rules.json"
+    }, {
+        from: "node_modules/@duckduckgo/autoconsent/rules/rules.json",
+        to: "autoconsent/rules.json"
+    }, {
+        from: "node_modules/@duckduckgo/autoconsent/LICENSE",
+        to: "autoconsent/LICENSE.txt"
     }]}),
     new ZipPlugin({
       path: 'dist/',
