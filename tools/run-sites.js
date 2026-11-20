@@ -169,6 +169,7 @@ function report(runs) {
     }
     fs.writeFileSync(path.join(outDir, "results.json"), JSON.stringify(runs, null, 1));
     fs.writeFileSync(path.join(outDir, "report.md"), report(runs));
+    require("./make-gallery.js")(outDir); // 사진 모아 보기 페이지
     console.log("결과 저장:", outDir);
 })().catch((e) => {
     console.error("시험 실패:", e);
