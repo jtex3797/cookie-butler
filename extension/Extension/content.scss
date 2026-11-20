@@ -1,6 +1,26 @@
 /* 쿠키 창을 가리는 규칙 (원본 동작 부분이 사용) */
+/* 작아지면서 흐려져 사라짐. scale은 사이트가 쓰는 transform(가운데 정렬 등)과 따로 적용됨 */
 .ConsentOMatic-CMP-Hider {
-    opacity: 0 !important;
+    animation: cookiehelper-shrink 0.32s cubic-bezier(0.5, 0, 0.9, 0.6) forwards !important;
+}
+
+@keyframes cookiehelper-shrink {
+    from {
+        opacity: 1;
+        scale: 1;
+    }
+    to {
+        opacity: 0;
+        scale: 0.82;
+    }
+}
+
+/* 움직임 줄이기를 켠 사용자는 바로 가림 */
+@media (prefers-reduced-motion: reduce) {
+    .ConsentOMatic-CMP-Hider {
+        animation: none !important;
+        opacity: 0 !important;
+    }
 }
 
 /* 처리 중 작은 알림: 화면 왼쪽 아래 */
