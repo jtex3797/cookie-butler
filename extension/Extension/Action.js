@@ -468,7 +468,7 @@ class HideAction extends Action {
             }
 
             if(ConsentEngine.generalSettings.hideInsteadOfPIP || this.config.forceHide === true) {
-                result.target.classList.add("ConsentOMatic-CMP-Hider");
+                hideSmoothly(result.target);
             } else {
                 ConsentEngine.singleton.enablePip();
                 result.target.classList.add("ConsentOMatic-CMP-PIP");
@@ -849,4 +849,33 @@ class RunMethodAction extends Action {
 
         return 0;
     }
+}
+// 쿠키 창을 작아지며 사라지게 가림.
+// 크기가 0인 껍데기(안쪽에 화면 고정 창을 품은 경우)에 scale을 주면 안쪽 창이 엉뚱한 곳으로 튀므로,
+// 껍데기는 흐려지기만 하고 안쪽의 보이는 창을 직접 줄임
+function hideSmoothly(target) {
+    if (target.classList.contains("ConsentOMatic-CMP-Hider")) return;
+
+    if (target.offsetHeight === 0 || target.offsetWidth === 0) {
+        target.classList.add("CookieHelper-FadeOnly");
+        try {
+            const root = target.shadowRoot
+                || (chrome.dom && chrome.dom.openOrClosedShadowRoot && chrome.dom.openOrClosedShadowRoot(target))
+                || target;
+            const boxes = [];
+            for (const el of Array.from(root.querySelectorAll("*")).slice(0, 400)) {
+                if (el.offsetHeight < 40 || el.offsetWidth < 40) continue;
+                if (boxes.some((box) => box.contains(el))) continue;
+                if (window.getComputedStyle(el).position !== "fixed") continue;
+                boxes.push(el);
+                if (boxes.length >= 3) break;
+            }
+            target.cookieHelperAnims = boxes.map((el) => el.animate(
+                [{ scale: 1 }, { scale: 0.82 }],
+                { duration: 320, easing: "cubic-bezier(0.5, 0, 0.9, 0.6)", fill: "forwards" }
+            ));
+        } catch (e) { /* 줄이기 실패 시 흐려지기만 함 */ }
+    }
+
+    target.classList.add("ConsentOMatic-CMP-Hider");
 }

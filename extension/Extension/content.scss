@@ -15,6 +15,20 @@
     }
 }
 
+/* 크기가 0인 껍데기는 흐려지기만 함 (안쪽 창은 Action.js의 hideSmoothly가 직접 줄임) */
+.ConsentOMatic-CMP-Hider.CookieHelper-FadeOnly {
+    animation-name: cookiehelper-fade !important;
+}
+
+@keyframes cookiehelper-fade {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
 /* 움직임 줄이기를 켠 사용자는 바로 가림 */
 @media (prefers-reduced-motion: reduce) {
     .ConsentOMatic-CMP-Hider {

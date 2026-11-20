@@ -53,6 +53,11 @@ export default class CMP {
 
         this.hiddenTargets.forEach((target)=>{
             target.classList.remove("ConsentOMatic-CMP-Hider");
+            target.classList.remove("CookieHelper-FadeOnly");
+            if (target.cookieHelperAnims) {
+                target.cookieHelperAnims.forEach((anim) => { try { anim.cancel(); } catch (e) { /* 이미 끝난 움직임 */ } });
+                target.cookieHelperAnims = null;
+            }
             target.classList.remove("ConsentOMatic-CMP-PIP");
 
             //Find styles we have not set
