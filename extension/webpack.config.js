@@ -77,6 +77,10 @@ module.exports = env=>({
             manifest.version = PACKAGE.version;
             return JSON.stringify(manifest, null, 2);
         }
+    }, {
+        // 원본(Consent-O-Matic)의 저작권 표시와 허가 조건을 묶음에 포함
+        from: "LICENSE",
+        to: "LICENSE.txt"
     }]}),
     new ZipPlugin({
       path: 'dist/',

@@ -78,7 +78,7 @@ function draw() {
     const q = $("#q").value.trim().toLowerCase();
     const shown = all.filter((s) => (filter === "all" || s.r === filter) && (!q || s.h.toLowerCase().includes(q)));
     if (!shown.length) {
-        $("#list").innerHTML = `<div class="none">${all.length ? "조건에 맞는 사이트 없음" : "기록 없음. 쿠키 창이 뜨는 사이트를 방문하면 여기에 쌓임"}</div>`;
+        $("#list").innerHTML = `<div class="none">${all.length ? "조건에 맞는 사이트 없음" : "기록 없음. 위의 기록 남기기를 켠 뒤 쿠키 창이 뜨는 사이트를 방문하면 여기에 쌓임"}</div>`;
         return;
     }
     $("#list").innerHTML = shown.map((s) => {
@@ -132,12 +132,26 @@ $("#clear").addEventListener("click", () => {
     draw();
 });
 
+// 기록 남기기 스위치 (기본은 꺼짐)
+function drawSwitch(on) {
+    $("#logSw").classList.toggle("on", on);
+    $("#logState").textContent = on ? "켜짐" : "꺼짐";
+    $("#logState").classList.toggle("on", on);
+}
+$("#logSw").addEventListener("click", () => {
+    const on = !$("#logSw").classList.contains("on");
+    drawSwitch(on);
+    if (hasStore) chrome.storage.local.set({ logEnabled: on });
+});
+
 if (hasStore) {
-    chrome.storage.local.get({ visitLog: [], cookieLog: [] }, (stored) => {
-        data = stored;
+    chrome.storage.local.get({ visitLog: [], cookieLog: [], logEnabled: false }, (stored) => {
+        data = { visitLog: stored.visitLog, cookieLog: stored.cookieLog };
+        drawSwitch(stored.logEnabled);
         draw();
     });
 } else {
+    drawSwitch(true);
     $("#sample").hidden = false;
     data = sampleData();
     opened.add("news.example.kr");

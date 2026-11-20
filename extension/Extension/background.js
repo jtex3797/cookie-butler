@@ -115,9 +115,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
             logVisit(json.url, "ok", json.cmp);
             scheduleAfterSnapshot(sender.tab, json.cmp);
 
-            // 처리 기록 저장 (오늘 처리 건수 표시에 사용)
+            // 처리 시각만 저장 (오늘 처리 건수 표시에 사용, 사이트 주소는 넣지 않음)
             chrome.storage.local.get({ handledLog: [] }, ({ handledLog }) => {
-                handledLog.push({ h: json.url, t: Date.now(), c: json.cmp });
+                handledLog.push({ t: Date.now() });
                 chrome.storage.local.set({ handledLog: handledLog.slice(-300) });
             });
 	    reply();
@@ -127,10 +127,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
         case "CMPShowing": {
             // 동의 창을 처리하기 직전의 쿠키 상태 기록
             const tab = sender.tab;
-            snapshotCookies(tab).then((list) => {
-                pendingCookies.set(tab.id, { h: hostOf(tab.url), t: Date.now(), before: list });
-                reply();
-            }).catch(() => reply());
+            chrome.storage.local.get({ logEnabled: false }, ({ logEnabled }) => {
+                // 기록을 켜지 않았으면 쿠키를 읽지 않음
+                if (!logEnabled) return reply();
+                snapshotCookies(tab).then((list) => {
+                    pendingCookies.set(tab.id, { h: hostOf(tab.url), t: Date.now(), before: list });
+                    reply();
+                }).catch(() => reply());
+            });
             return true;
         }
 
@@ -153,7 +157,9 @@ let visitQueue = Promise.resolve();
 function logVisit(host, r, cmp) {
     if (!host) return;
     visitQueue = visitQueue.then(() => new Promise((resolve) => {
-        chrome.storage.local.get({ visitLog: [] }, ({ visitLog }) => {
+        chrome.storage.local.get({ visitLog: [], logEnabled: false }, ({ visitLog, logEnabled }) => {
+            // 기록은 사용자가 기록 화면에서 켰을 때만 남김
+            if (!logEnabled) return resolve();
             const now = Date.now();
             const dup = visitLog.some((e) => e.h === host && e.r === r && now - e.t < 6 * 3600 * 1000);
             if (dup) return resolve();

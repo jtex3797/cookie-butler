@@ -26,13 +26,15 @@ function colorAt(x, y) {
     return ORANGE;
 }
 
-function render(size) {
+// pad: 그림 둘레에 두는 투명 여백(칸 수). 스토어용 아이콘에만 사용
+function render(size, pad = 0) {
+    const art = size - pad * 2;
     const S = 8; // 가장자리를 부드럽게 하려고 한 칸을 8x8로 나눠 평균
     const px = Buffer.alloc(size * size * 4);
     for (let j = 0; j < size; j++) for (let i = 0; i < size; i++) {
         let r = 0, g = 0, b = 0, a = 0;
         for (let sj = 0; sj < S; sj++) for (let si = 0; si < S; si++) {
-            const c = colorAt((i + (si + 0.5) / S) * 64 / size, (j + (sj + 0.5) / S) * 64 / size);
+            const c = colorAt((i - pad + (si + 0.5) / S) * 64 / art, (j - pad + (sj + 0.5) / S) * 64 / art);
             if (c) { r += c[0]; g += c[1]; b += c[2]; a++; }
         }
         const o = (j * size + i) * 4;
@@ -62,3 +64,9 @@ for (const size of [16, 32, 48, 96, 128]) {
     fs.writeFileSync(file, png(size, render(size)));
     console.log("저장:", file);
 }
+
+// Chrome 웹 스토어용: 128칸 안에 그림 96칸, 둘레 16칸 투명 여백
+const storeDir = path.join(__dirname, "..", "store");
+fs.mkdirSync(storeDir, { recursive: true });
+fs.writeFileSync(path.join(storeDir, "store-icon-128.png"), png(128, render(128, 16)));
+console.log("저장:", path.join(storeDir, "store-icon-128.png"));
