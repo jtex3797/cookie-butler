@@ -147,7 +147,8 @@ export default class ConsentEngine {
         this.stopEngineId = setTimeout(() => {
             // 창이 뜨는지 확인하는 중이면 "못 찾음"을 알리지 않고 다시 기다림
             // (알려 버리면 다른 엔진이 시작돼 같은 창을 둘이 처리할 수 있음)
-            if (self.checkRunning) {
+            // 확인 도중 예외로 checkRunning이 true로 남는 경우에 대비해 6회(약 30초)까지만 미룸
+            if (self.checkRunning && (self.stopRetries = (self.stopRetries || 0) + 1) <= 6) {
                 self.startStopTimeout();
                 return;
             }

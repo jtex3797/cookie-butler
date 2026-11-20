@@ -65,20 +65,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
 
             tabStatusMap.set(sender.tab.id, STATUS.HANDLED);
 
-            GDPRConfig.getStatistics().then((entries)=>{
-                entries.clicks += json.clicks;
-                
-                if (!entries.cmps.hasOwnProperty(json.cmp)){
-                    entries.cmps[json.cmp] = {
-                        filledForms: 0,
-                        clicks: 0
-                    }
-                }
-                entries.cmps[json.cmp].filledForms ++;
-                entries.cmps[json.cmp].clicks += json.clicks;
-
-                GDPRConfig.setStatistics(entries);
-            });
 
             logVisit(json.url, "ok", json.cmp);
             scheduleAfterSnapshot(sender.tab, json.cmp);

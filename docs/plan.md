@@ -32,7 +32,7 @@
 - "못 찾음" 판정
   - autoconsent: `instance.state.lifecycle`을 0.2초 간격으로 확인. `nothingDetected`이거나, `cmpDetected`(업체 흔적은 있으나 창이 안 보임) 상태가 7초(35회)를 넘거나, 전체 100회(20초)를 넘으면 못 찾은 것으로 처리. autoconsent는 창이 뜨기를 약 5초 기다린 뒤 상태를 바꾸지 않고 끝내기 때문
   - Consent-O-Matic: 엔진이 5초 동안 못 찾으면 콜백에서 handled, error 모두 아닌 경우
-- 두 엔진 중복 방지 1: Consent-O-Matic의 5초 정지 타이머는 창이 뜨는지 확인하는 중(`checkRunning`)이면 다시 걸고 끝냄. autoconsent 쪽은 못 찾은 것으로 넘긴 뒤(`gaveUp`)에는 배경과 메시지를 주고받지 않고, `optOut`/`optIn` 지시는 프레임당 1번만 받음
+- 두 엔진 중복 방지 1: Consent-O-Matic의 5초 정지 타이머는 창이 뜨는지 확인하는 중(`checkRunning`)이면 다시 걸고 끝냄(최대 6회, 약 30초. 넘으면 못 찾은 것으로 처리). autoconsent 쪽은 못 찾은 것으로 넘긴 뒤(`gaveUp`)에는 배경과 메시지를 주고받지 않고, `optOut`/`optIn` 지시는 프레임당 1번만 받음
 - 탭 상태 메시지(`Searching`, `NothingFound`)는 맨 위 페이지만 보냄
 - 두 엔진 중복 방지 2: 두 번째 엔진을 시작하기 전에 배경에 `PopupSeen`을 물어, 같은 탭의 어느 프레임이든 쿠키 창을 찾은 적이 있으면 시작하지 않음. 배경의 `popupSeenTabs`는 autoconsent `popupFound`와 Consent-O-Matic `CMPShowing`에서 추가, 탭이 `loading` 상태가 되면 제거
 
@@ -59,6 +59,7 @@
 - `logEnabled`(기본 false)가 true일 때만 `visitLog`(사이트, 시각, 결과, 동의 창 종류. 같은 사이트 같은 결과는 6시간에 1번, 최근 2000건)와 `cookieLog`(동의 전 쿠키, 처리 4초 뒤 새로 생긴 쿠키. 최근 150건) 저장
 - 쿠키는 `chrome.cookies.getAll({url})`로 읽고 이름, 주소, 외부 여부, 남은 일수만 저장. 대상 주소는 맨 위 페이지가 `performance.getEntriesByType("resource")`로 알려 준 주소(최대 80개)
 - `handledLog`: 처리 시각만 저장(오늘 처리 건수용), 기록 스위치와 무관
+- 원본의 `statistics`(동의 창 종류별 처리 횟수) 저장은 제거. 읽는 곳이 없었음
 
 ### 2.6 권한
 
