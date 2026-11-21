@@ -59,12 +59,20 @@ async function contentScriptRunner() {
         chrome.runtime.sendMessage(findConsentWall() ? "ConsentWall" : "NothingFound");
     };
 
-    // 거부 선택지 없는 창은 두 엔진이 다 끝나기(20초 이상)를 기다리지 않고 4초 뒤에 먼저 알림.
+    // 거부 선택지 없는 창은 두 엔진이 다 끝나기(20초 이상)를 기다리지 않고 보이는 대로 먼저 알림.
     // 그 뒤에 엔진이 창을 찾아 처리하면 처리 완료 표시가 덮어씀
+    // 0.5초마다 최대 8초 동안 살펴보다가, 창이 보이면 0.8초 뒤 한 번 더 확인하고 알림
+    // (그 0.8초는 엔진이 같은 창을 찾아 처리를 시작할 시간. 시작했으면 알리지 않음)
     if (isTop) {
-        setTimeout(async () => {
-            if (!(await ask("PopupSeen")) && findConsentWall()) chrome.runtime.sendMessage("ConsentWall");
-        }, 4000);
+        let looks = 0;
+        const watch = setInterval(() => {
+            if (++looks > 16) return clearInterval(watch);
+            if (!findConsentWall()) return;
+            clearInterval(watch);
+            setTimeout(async () => {
+                if (!(await ask("PopupSeen")) && findConsentWall()) chrome.runtime.sendMessage("ConsentWall");
+            }, 800);
+        }, 500);
     }
 
     if (level === 0 || level === 3) {
@@ -96,7 +104,14 @@ function findConsentWall() {
     // 단독으로 "거부"만 뜻하는 버튼. "Rifiuta e abbonati"(거부하고 구독)처럼 구독이 붙은 것은 제외
     const reject = /^(reject( all)?|refuse( all)?|decline( all)?|deny( all)?|(alle )?ablehnen|(tout )?refuser|rifiuta( tutto)?|rechazar( todo)?|weigeren|afvis( alle)?|necessary only|only necessary|nur notwendige|continue without accepting|continuer sans accepter)$/i;
     try {
-        for (const el of document.querySelectorAll("div, section, aside, dialog, form")) {
+        // 이런 창은 화면 가운데나 아래쪽을 덮으므로 그 두 지점에 겹쳐 있는 요소만 살핌 (자주 불러도 가볍게)
+        if (document.body == null) return false;
+        const candidates = new Set([
+            ...document.elementsFromPoint(window.innerWidth / 2, window.innerHeight / 2),
+            ...document.elementsFromPoint(window.innerWidth / 2, window.innerHeight - 60)
+        ]);
+        for (const el of candidates) {
+            if (!/^(DIV|SECTION|ASIDE|DIALOG|FORM)$/.test(el.tagName)) continue;
             const style = window.getComputedStyle(el);
             if (style.position !== "fixed" && style.position !== "sticky" && el.tagName !== "DIALOG") continue;
             if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) < 0.1) continue;
