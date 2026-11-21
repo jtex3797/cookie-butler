@@ -103,7 +103,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
         case "ConsentWall": {
             // 두 엔진 모두 못 찾았고, 화면에 거부 선택지 없는 동의 창이 보이는 경우
             const tabId = sender.tab.id;
-            if (tabStatusMap.get(tabId) !== STATUS.HANDLED) {
+            // 같은 탭에서 이미 알렸으면(4초 뒤 먼저 알림, 엔진이 끝난 뒤 다시 확인) 한 번만 표시
+            if (tabStatusMap.get(tabId) !== STATUS.HANDLED && tabStatusMap.get(tabId) !== STATUS.WALL) {
                 setBadgeCheckmark("!", tabId);
                 tabStatusMap.set(tabId, STATUS.WALL);
                 logVisit(hostOf(sender.tab.url), "wall", null, null);

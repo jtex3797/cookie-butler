@@ -59,6 +59,14 @@ async function contentScriptRunner() {
         chrome.runtime.sendMessage(findConsentWall() ? "ConsentWall" : "NothingFound");
     };
 
+    // 거부 선택지 없는 창은 두 엔진이 다 끝나기(20초 이상)를 기다리지 않고 4초 뒤에 먼저 알림.
+    // 그 뒤에 엔진이 창을 찾아 처리하면 처리 완료 표시가 덮어씀
+    if (isTop) {
+        setTimeout(async () => {
+            if (!(await ask("PopupSeen")) && findConsentWall()) chrome.runtime.sendMessage("ConsentWall");
+        }, 4000);
+    }
+
     if (level === 0 || level === 3) {
         // 필수만, 전부 허용: autoconsent 먼저, 못 찾으면 Consent-O-Matic
         runAutoconsent(async () => {
