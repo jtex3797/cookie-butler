@@ -57,7 +57,7 @@ Consent dialog handling uses autoconsent (DuckDuckGo, MPL-2.0) and Consent-O-Mat
 개인정보 보호 및 보안 계열 (대시보드의 실제 분류 이름에서 선택)
 
 ### 언어
-한국어 (영어 설명 추가 여부 미정)
+한국어, 영어. 확장 프로그램 기본 언어(`default_locale`)는 영어(en)이므로 대시보드 기본 등록 문구는 영어 상세 설명, 한국어(ko)는 언어별 문구로 추가. 화면 문구는 `extension/Extension/_locales/`의 ko, en 파일에서 브라우저 언어에 맞춰 선택(ko 외 언어는 영어)
 
 ## 3. Privacy 탭 답변
 
@@ -107,7 +107,7 @@ https://github.com/jtex3797/cookie-butler/blob/main/PRIVACY.md
 - [x] 화면 사진 3장 제작
 - [ ] 평소 쓰는 Chrome에서 "이 사이트 쿠키 지우기" 버튼과 기록 화면 확인
 - [x] `PRIVACY.md` 공개 주소 게시 (GitHub 공개 저장소)
-- [ ] 원본의 `logo.svg`, `hide.svg`, `minimize.svg` 사용 여부 확인 후 미사용분 제거
-- [ ] 한국어 외 언어 지원 여부 결정(화면 문구가 한국어 고정)
+- [x] 원본의 `logo.svg`, `hide.svg`, `minimize.svg` 미사용 확인 후 제거(2026-11-21)
+- [x] 영어 화면 문구 추가(2026-11-21): 작은 창, 기록 화면, 처리 알림. 영어와 한국어 브라우저에서 화면 확인 완료
 - [ ] Chrome 개발자 등록과 결제, Edge Partner Center 등록 (본인이 직접)
 - [ ] Edge Add-ons 요구 사항 확인

@@ -1,7 +1,8 @@
 {
-	"name": "Cookie Butler",
-	"description": "쿠키 동의 창을 정해 둔 범위대로 대신 처리합니다. 필수만, 기능까지, 통계까지, 전부 허용 중 선택.",
-	"author": "Consent-O-Matic (CAVI - Aarhus University) 기반 개조",
+	"name": "__MSG_appName__",
+	"description": "__MSG_appDesc__",
+	"default_locale": "en",
+	"author": "Based on Consent-O-Matic (CAVI - Aarhus University)",
 	"version": "REPLACED_BY_BUILD_SCRIPT",
 	"manifest_version": 3,
 	"permissions": [

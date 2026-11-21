@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 import GDPRConfig from './GDPRConfig.js';
 import { filterCompactRules, evalSnippets } from "@duckduckgo/autoconsent";
 import extraAutoconsentRules from "./extraAutoconsentRules.js";
@@ -112,7 +113,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
                 setBadgeCheckmark("!", tabId);
                 tabStatusMap.set(tabId, STATUS.WALL);
                 logVisit(hostOf(sender.tab.url), "wall", null, null);
-                notice(tabId, "info", "거부 선택지가 없는 창이라 처리하지 않음");
+                notice(tabId, "info", t("noticeWall"));
             }
             reply();
             return false;
@@ -376,7 +377,7 @@ async function goAutoconsent(tab, frameId) {
     } catch (e) { /* 탭이 닫힌 경우 */ }
     // 방금 처리한 사이트가 새로 고쳐진 뒤 같은 창을 다시 알아본 경우에는 "처리 중" 알림을 띄우지 않음.
     // 이때는 누를 버튼이 없어 엔진이 한참 기다리다 끝나고, 그동안 알림이 계속 남아 있었음 (확인: termly.io)
-    if (!wasJustOk(hostOf(tab.url))) notice(tabId, "start", "쿠키 창 처리 중");
+    if (!wasJustOk(hostOf(tab.url))) notice(tabId, "start", t("noticeWorking"));
     const { logEnabled } = await chrome.storage.local.get({ logEnabled: false });
     if (logEnabled) {
         try {
@@ -481,10 +482,10 @@ async function handleAutoconsent(message, sender) {
             scheduleAfterSnapshot(sender.tab, message.cmp);
             const level = await currentLevel();
             const doneText = message.isCosmetic
-                ? "쿠키 창 가림 (거부 버튼 없는 창)"
-                : level === 3 ? "쿠키 창 닫음, 전부 허용"
-                : level === 0 ? "쿠키 창 닫음, 필수만 허용"
-                : "쿠키 창 닫음, 필수만 허용 (종류별 선택이 안 되는 창)";
+                ? t("noticeHidden")
+                : level === 3 ? t("noticeClosed", [t("level3")])
+                : level === 0 ? t("noticeClosed", [t("level0")])
+                : t("noticeFallback");
             doneTexts.set(site, { text: doneText, t: Date.now() });
             notice(tabId, "done", doneText);
             break;

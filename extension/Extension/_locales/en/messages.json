@@ -1,0 +1,233 @@
+{
+  "appName": {
+    "message": "Cookie Butler"
+  },
+  "appDesc": {
+    "message": "Answers cookie consent dialogs for you, the way you chose: necessary only, plus functional, plus statistics, or allow all."
+  },
+  "todayClosed": {
+    "message": "dialogs handled today"
+  },
+  "howMuch": {
+    "message": "How much to allow"
+  },
+  "levelAria": {
+    "message": "Cookie allowance level"
+  },
+  "tile0": {
+    "message": "Needed"
+  },
+  "tile0Sub": {
+    "message": "login etc."
+  },
+  "tile1": {
+    "message": "Function"
+  },
+  "tile1Sub": {
+    "message": "language"
+  },
+  "tile2": {
+    "message": "Stats"
+  },
+  "tile2Sub": {
+    "message": "visit counts"
+  },
+  "tile3": {
+    "message": "Ads"
+  },
+  "tile3Sub": {
+    "message": "targeting"
+  },
+  "level0": {
+    "message": "Necessary only"
+  },
+  "level1": {
+    "message": "Plus functional"
+  },
+  "level2": {
+    "message": "Plus statistics"
+  },
+  "level3": {
+    "message": "Allow all"
+  },
+  "level0Desc": {
+    "message": "Only what the site needs to work"
+  },
+  "level1Desc": {
+    "message": "Remembers language and display settings"
+  },
+  "level2Desc": {
+    "message": "Helps sites count visits"
+  },
+  "level3Desc": {
+    "message": "Includes targeted ads"
+  },
+  "applyNext": {
+    "message": "Applies from the next page you open"
+  },
+  "useOnSite": {
+    "message": "Use on this site"
+  },
+  "thisPage": {
+    "message": "This page"
+  },
+  "notHere": {
+    "message": "Does not work here"
+  },
+  "clearSite": {
+    "message": "Clear this site's cookies"
+  },
+  "clearAsk": {
+    "message": "Click again to delete (signs you out of this site)"
+  },
+  "clearing": {
+    "message": "Clearing"
+  },
+  "openLog": {
+    "message": "View records"
+  },
+  "status2": {
+    "message": "This page: looking for a cookie dialog"
+  },
+  "status3": {
+    "message": "This page: could not handle"
+  },
+  "status4": {
+    "message": "This page: cookie dialog handled"
+  },
+  "status5": {
+    "message": "This page: left alone, the dialog has no way to refuse"
+  },
+  "noticeWorking": {
+    "message": "Handling cookie dialog"
+  },
+  "noticeWall": {
+    "message": "Left alone: this dialog has no way to refuse"
+  },
+  "noticeHidden": {
+    "message": "Cookie dialog hidden (no refuse button)"
+  },
+  "noticeClosed": {
+    "message": "Cookie dialog closed, $1"
+  },
+  "noticeFallback": {
+    "message": "Cookie dialog closed, necessary only (dialog has no per-category choice)"
+  },
+  "logTitle": {
+    "message": "Cookie Butler records"
+  },
+  "logLead": {
+    "message": "Results per site, and the cookies set before and after the consent dialog was handled. Stored only in this browser."
+  },
+  "exportFile": {
+    "message": "Export to file"
+  },
+  "clearLog": {
+    "message": "Delete records"
+  },
+  "keepRecords": {
+    "message": "Keep records"
+  },
+  "keepRecordsDesc": {
+    "message": "When on, the address of each site whose cookie dialog was handled, the result, and cookie names and lifetimes are saved in this browser. Cookie values are never saved or sent anywhere. Turning it off stops new records; use \"Delete records\" to remove saved ones."
+  },
+  "sampleNote": {
+    "message": "Preview opened outside the extension. The data below is a sample."
+  },
+  "filterAll": {
+    "message": "All"
+  },
+  "resOk": {
+    "message": "Handled"
+  },
+  "resFail": {
+    "message": "Not handled"
+  },
+  "resNone": {
+    "message": "No dialog"
+  },
+  "resWall": {
+    "message": "Left alone"
+  },
+  "resWallLong": {
+    "message": "Left alone (no way to refuse)"
+  },
+  "searchSite": {
+    "message": "Search site address"
+  },
+  "on": {
+    "message": "On"
+  },
+  "off": {
+    "message": "Off"
+  },
+  "untilClose": {
+    "message": "until closed"
+  },
+  "years": {
+    "message": "$1 yr"
+  },
+  "months": {
+    "message": "$1 mo"
+  },
+  "days": {
+    "message": "$1 d"
+  },
+  "emptyList": {
+    "message": "None"
+  },
+  "external": {
+    "message": "3rd"
+  },
+  "statOk": {
+    "message": "sites handled"
+  },
+  "statFail": {
+    "message": "sites not handled"
+  },
+  "statNone": {
+    "message": "no dialog or not found"
+  },
+  "statEarly": {
+    "message": "cookies set before consent ($1 third-party)"
+  },
+  "noMatch": {
+    "message": "No matching sites"
+  },
+  "noRecords": {
+    "message": "No records. Turn on Keep records above, then visit a site with a cookie dialog."
+  },
+  "sumBefore": {
+    "message": "Before consent <b>$1</b> ($2 third-party)"
+  },
+  "sumAfter": {
+    "message": "after"
+  },
+  "noCookieRecord": {
+    "message": "No cookie record"
+  },
+  "metaLine": {
+    "message": "Dialog type: $1 | Level applied: $2 | Recorded: $3"
+  },
+  "unknown": {
+    "message": "unknown"
+  },
+  "beforeTitle": {
+    "message": "Cookies present before consent"
+  },
+  "afterTitle": {
+    "message": "New cookies after handling"
+  },
+  "count": {
+    "message": "$1"
+  },
+  "okNoCookie": {
+    "message": "Handled before cookie recording was added"
+  },
+  "failNoCookie": {
+    "message": "Dialog was not handled, so there is no before/after cookie record"
+  },
+  "clearConfirm": {
+    "message": "Delete all records? This cannot be undone. Export to a file first if you need them."
+  }
+}

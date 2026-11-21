@@ -15,8 +15,7 @@ module.exports = env=>({
       "./Extension/icon_32.png",
       "./Extension/icon_48.png",
       "./Extension/icon_96.png",
-      "./Extension/icon_128.png",
-      "./Extension/hide.svg", "./Extension/logo.svg", "./Extension/minimize.svg"
+      "./Extension/icon_128.png"
     ],
     log: [
       './Extension/log.js',
@@ -77,6 +76,10 @@ module.exports = env=>({
             manifest.version = PACKAGE.version;
             return JSON.stringify(manifest, null, 2);
         }
+    }, {
+        // 화면 문구 (한국어, 영어)
+        from: "Extension/_locales",
+        to: "_locales"
     }, {
         // 원본(Consent-O-Matic)의 저작권 표시와 허가 조건을 묶음에 포함
         from: "LICENSE",

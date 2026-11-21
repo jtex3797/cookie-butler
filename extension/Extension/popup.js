@@ -1,16 +1,19 @@
 import GDPRConfig from './GDPRConfig.js';
+import { t, applyI18n } from './i18n.js';
+
+applyI18n();
 
 const $ = (s) => document.querySelector(s);
 
 // 드래그바 단계별 허용 범위. 값은 원본 동작 부분의 쿠키 분류 기호
 // A 기능, B 통계, D 정보 저장, E 콘텐츠 맞춤, F 광고, X 기타
 const LEVELS = [
-    { name: "필수만 허용", desc: "사이트가 돌아가는 데 필요한 것만", allow: [] },
-    { name: "기능까지 허용", desc: "언어, 화면 설정 기억", allow: ["A"] },
-    { name: "통계까지 허용", desc: "방문 집계에 협조", allow: ["A", "B"] },
-    { name: "전부 허용", desc: "맞춤 광고 포함", allow: ["A", "B", "D", "E", "F", "X"] }
+    { name: t("level0"), desc: t("level0Desc"), allow: [] },
+    { name: t("level1"), desc: t("level1Desc"), allow: ["A"] },
+    { name: t("level2"), desc: t("level2Desc"), allow: ["A", "B"] },
+    { name: t("level3"), desc: t("level3Desc"), allow: ["A", "B", "D", "E", "F", "X"] }
 ];
-const STATUS_TEXT = { 2: "이 페이지: 쿠키 창 찾는 중", 3: "이 페이지: 처리 못 함", 4: "이 페이지: 쿠키 창 처리 완료", 5: "이 페이지: 거부 선택지가 없는 창이라 처리 안 함" };
+const STATUS_TEXT = { 2: t("status2"), 3: t("status3"), 4: t("status4"), 5: t("status5") };
 
 function levelFromValues(v) {
     if (v.D || v.E || v.F || v.X) return 3;
@@ -21,7 +24,10 @@ function levelFromValues(v) {
 
 function drawLevel(level) {
     document.querySelectorAll("#tiles .tile").forEach((t, i) => t.classList.toggle("on", i <= level));
-    $("#lv").innerHTML = LEVELS[level].name + "<small>" + LEVELS[level].desc + "</small>";
+    $("#lv").textContent = LEVELS[level].name;
+    const small = document.createElement("small");
+    small.textContent = LEVELS[level].desc;
+    $("#lv").appendChild(small);
 }
 
 // 허용 범위
@@ -66,8 +72,8 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     } catch (e) { /* 주소 없는 탭 */ }
 
     if (!host) {
-        $("#host").textContent = "이 페이지";
-        $("#hostSub").textContent = "여기서는 동작하지 않음";
+        $("#host").textContent = t("thisPage");
+        $("#hostSub").textContent = t("notHere");
         sw.disabled = true;
         $("#clearSite").disabled = true;
         return;
@@ -78,11 +84,11 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     clearButton.addEventListener("click", async () => {
         if (!clearButton.classList.contains("ask")) {
             clearButton.classList.add("ask");
-            clearButton.textContent = "한 번 더 누르면 삭제 (이 사이트에서 로그아웃됨)";
+            clearButton.textContent = t("clearAsk");
             return;
         }
         clearButton.disabled = true;
-        clearButton.textContent = "지우는 중";
+        clearButton.textContent = t("clearing");
         try {
             // 이 주소로 보내지는 쿠키 전부 (상위 주소에 심긴 것 포함)
             const cookies = await chrome.cookies.getAll({ url: tab.url });

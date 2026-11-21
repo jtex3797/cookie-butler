@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 import CMP from "./CMP.js";
 
 export default class ConsentEngine {
@@ -276,7 +277,7 @@ export default class ConsentEngine {
                                 if (self.aborted) return;
 
                                 if (!ConsentEngine.debugValues.skipHideMethod) {
-                                    self.showProgressDialog("쿠키 창 처리 중");
+                                    self.showProgressDialog(t("noticeWorking"));
                                 }
 
                                 self.totalSteps = cmp.getNumSteps();
@@ -464,10 +465,10 @@ export default class ConsentEngine {
     // 지금 설정된 허용 범위를 알림 문구로 변환
     allowText() {
         const v = this.consentTypes || {};
-        if (v.D || v.E || v.F || v.X) return "전부 허용";
-        if (v.B) return "통계까지 허용";
-        if (v.A) return "기능까지 허용";
-        return "필수만 허용";
+        if (v.D || v.E || v.F || v.X) return t("level3");
+        if (v.B) return t("level2");
+        if (v.A) return t("level1");
+        return t("level0");
     }
 
     hideProgressDialog() {
@@ -484,7 +485,7 @@ export default class ConsentEngine {
         // 성공하면 결과 문구를 잠깐 보여 준 뒤 내려감
         if (ok && dialog != null) {
             const p = dialog.querySelector("p");
-            if (p != null) p.innerText = "쿠키 창 닫음, " + this.allowText();
+            if (p != null) p.innerText = t("noticeClosed", [this.allowText()]);
             modal.classList.add("CookieHelper-Done");
         }
         this.dialogTimeoutId = setTimeout(() => {

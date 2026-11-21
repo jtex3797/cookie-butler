@@ -46,26 +46,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;heigh
 </style>
 </head>
 <body>
-  <div class="num"><b id="cnt">0</b><span>오늘 대신 닫은 창</span></div>
+  <div class="num"><b id="cnt">0</b><span data-i18n="todayClosed">오늘 대신 닫은 창</span></div>
   <div class="status" id="status"></div>
 
-  <h3>얼마나 허용할지</h3>
-  <input type="range" id="level" min="0" max="3" step="1" value="0" aria-label="쿠키 허용 범위">
+  <h3 data-i18n="howMuch">얼마나 허용할지</h3>
+  <input type="range" id="level" min="0" max="3" step="1" value="0" aria-label="쿠키 허용 범위" data-i18n-aria="levelAria">
   <div class="tiles" id="tiles">
-    <button class="tile">필수<em>로그인 등</em></button>
-    <button class="tile">기능<em>언어 설정</em></button>
-    <button class="tile">통계<em>방문 집계</em></button>
-    <button class="tile">광고<em>맞춤 광고</em></button>
+    <button class="tile"><span data-i18n="tile0">필수</span><em data-i18n="tile0Sub">로그인 등</em></button>
+    <button class="tile"><span data-i18n="tile1">기능</span><em data-i18n="tile1Sub">언어 설정</em></button>
+    <button class="tile"><span data-i18n="tile2">통계</span><em data-i18n="tile2Sub">방문 집계</em></button>
+    <button class="tile"><span data-i18n="tile3">광고</span><em data-i18n="tile3Sub">맞춤 광고</em></button>
   </div>
   <div class="lv" id="lv"></div>
-  <div class="note" id="note">다음에 여는 페이지부터 적용</div>
+  <div class="note" id="note" data-i18n="applyNext">다음에 여는 페이지부터 적용</div>
 
   <div class="site">
-    <div class="t"><b id="host"></b><small id="hostSub">이 사이트에서 사용</small></div>
-    <button class="sw" id="siteSw" aria-label="이 사이트에서 사용"></button>
+    <div class="t"><b id="host"></b><small id="hostSub" data-i18n="useOnSite">이 사이트에서 사용</small></div>
+    <button class="sw" id="siteSw" aria-label="이 사이트에서 사용" data-i18n-aria="useOnSite"></button>
   </div>
-  <button class="more" id="clearSite">이 사이트 쿠키 지우기</button>
-  <button class="more" id="openLog">기록 보기</button>
+  <button class="more" id="clearSite" data-i18n="clearSite">이 사이트 쿠키 지우기</button>
+  <button class="more" id="openLog" data-i18n="openLog">기록 보기</button>
   <script src="ui.js"></script>
 </body>
 </html>

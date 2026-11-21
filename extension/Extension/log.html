@@ -72,25 +72,25 @@ h1{font-size:22px}
 <body>
 <main>
   <div class="top">
-    <div><h1>Cookie Butler 기록</h1><p class="lead">사이트별 처리 결과와, 동의 창을 처리하기 전후에 심긴 쿠키. 이 PC 브라우저 안에만 저장됨.</p></div>
+    <div><h1 data-i18n="logTitle">Cookie Butler 기록</h1><p class="lead" data-i18n="logLead">사이트별 처리 결과와, 동의 창을 처리하기 전후에 심긴 쿠키. 이 PC 브라우저 안에만 저장됨.</p></div>
     <div class="sp"></div>
-    <button class="btn" id="export">파일로 내보내기</button>
-    <button class="btn" id="clear">기록 삭제</button>
+    <button class="btn" id="export" data-i18n="exportFile">파일로 내보내기</button>
+    <button class="btn" id="clear" data-i18n="clearLog">기록 삭제</button>
   </div>
   <div class="consent">
-    <div class="t"><b>기록 남기기</b><span id="logState"></span>
-      <p>켜면 쿠키 창을 처리한 사이트의 주소, 처리 결과, 쿠키 이름과 유효 기간을 이 브라우저 안에 저장함. 쿠키 값은 저장하지 않고, 어디로도 보내지 않음. 끄면 새 기록을 멈추고, 쌓인 기록은 "기록 삭제"로 지움.</p></div>
-    <button class="sw" id="logSw" aria-label="기록 남기기"></button>
+    <div class="t"><b data-i18n="keepRecords">기록 남기기</b><span id="logState"></span>
+      <p data-i18n="keepRecordsDesc">켜면 쿠키 창을 처리한 사이트의 주소, 처리 결과, 쿠키 이름과 유효 기간을 이 브라우저 안에 저장함. 쿠키 값은 저장하지 않고, 어디로도 보내지 않음. 끄면 새 기록을 멈추고, 쌓인 기록은 "기록 삭제"로 지움.</p></div>
+    <button class="sw" id="logSw" aria-label="기록 남기기" data-i18n-aria="keepRecords"></button>
   </div>
-  <div id="sample" class="sample" hidden>확장 프로그램 밖에서 연 미리 보기 화면. 아래는 예시 자료.</div>
+  <div id="sample" class="sample" hidden data-i18n="sampleNote">확장 프로그램 밖에서 연 미리 보기 화면. 아래는 예시 자료.</div>
   <div class="stats" id="stats"></div>
   <div class="bar" id="bar">
-    <button class="chip on" data-f="all">전체</button>
-    <button class="chip" data-f="ok">처리 완료</button>
-    <button class="chip" data-f="fail">처리 못 함</button>
-    <button class="chip" data-f="none">쿠키 창 없음</button>
-    <button class="chip" data-f="wall">처리 불가</button>
-    <input id="q" type="search" placeholder="사이트 주소 검색" aria-label="사이트 주소 검색">
+    <button class="chip on" data-f="all" data-i18n="filterAll">전체</button>
+    <button class="chip" data-f="ok" data-i18n="resOk">처리 완료</button>
+    <button class="chip" data-f="fail" data-i18n="resFail">처리 못 함</button>
+    <button class="chip" data-f="none" data-i18n="resNone">쿠키 창 없음</button>
+    <button class="chip" data-f="wall" data-i18n="resWall">처리 불가</button>
+    <input id="q" type="search" placeholder="사이트 주소 검색" aria-label="사이트 주소 검색" data-i18n-ph="searchSite" data-i18n-aria="searchSite">
   </div>
   <div id="list"></div>
 </main>
