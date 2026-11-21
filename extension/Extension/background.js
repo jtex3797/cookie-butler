@@ -43,7 +43,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
         }
 
         case "NothingFound": {
-            if(tabStatusMap.get(sender.tab.id) !== STATUS.HANDLED) {
+            if (wasJustOk(hostOf(sender.tab.url))) {
+                // 방금 처리한 사이트가 동의를 저장하며 새로 고친 경우. 창이 없는 것이 당연하므로 처리 완료 표시를 유지
+                setBadgeCheckmark("✔", sender.tab.id);
+                tabStatusMap.set(sender.tab.id, STATUS.HANDLED);
+            } else if(tabStatusMap.get(sender.tab.id) !== STATUS.HANDLED) {
                 logVisit(hostOf(sender.tab.url), "none", null);
                 setBadgeCheckmark("", sender.tab.id);
                 tabStatusMap.set(sender.tab.id, STATUS.NOTHING);
