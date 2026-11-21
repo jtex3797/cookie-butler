@@ -112,6 +112,13 @@ export default {
 
 // 원본 규칙을 통째로 바꾸지 않고 부족한 부분만 덧붙임 (원본이 갱신돼도 계속 따라감)
 export function patchRules(config) {
+    // sourcepoint: 원본 규칙이 설정 창을 열어 놓고 멈추고, 그 상태에서는 autoconsent도 닫지 못함
+    // (확인: theguardian.com, 2026-11-21 시험). 이 종류는 Consent-O-Matic에서 빼고 autoconsent에 맡김.
+    // 종류별 선택은 안 되고 전부 거부로 처리됨
+    for (const name of Object.keys(config)) {
+        if (/^sourcepoint/i.test(name)) delete config[name];
+    }
+
     // didomi: 종류를 하나라도 고르지 않으면 "Save" 버튼이 눌리지 않음.
     // 원본은 이름을 아는 종류만 골라서, 모르는 종류가 있으면 저장을 못 하고 창이 남음.
     // 먼저 맨 위의 일괄 버튼으로 전부 고른 뒤 종류별 선택을 진행하게 함.

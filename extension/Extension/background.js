@@ -30,8 +30,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
         }
 
         case "CMPError": {
-            logVisit(hostOf(sender.tab.url), "fail", null, "com");
-            if(tabStatusMap.get(sender.tab.id) !== STATUS.HANDLED) {
+            scheduleVerify(sender.tab.id, 1500);
+            if(tabStatusMap.get(sender.tab.id) !== STATUS.HANDLED && !wasJustOk(hostOf(sender.tab.url))) {
+                logVisit(hostOf(sender.tab.url), "fail", null, "com");
                 setBadgeCheckmark("\u2717", sender.tab.id);
                 tabStatusMap.set(sender.tab.id, STATUS.ERROR);
             }
@@ -66,7 +67,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
             tabStatusMap.set(sender.tab.id, STATUS.HANDLED);
 
 
+            markOk(json.url);
             logVisit(json.url, "ok", json.cmp, "com");
+            scheduleVerify(sender.tab.id, 1500);
             scheduleAfterSnapshot(sender.tab, json.cmp);
 
             // 처리 시각만 저장 (오늘 처리 건수 표시에 사용, 사이트 주소는 넣지 않음)
@@ -82,6 +85,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
             // 동의 창을 처리하기 직전의 쿠키 상태 기록
             const tab = sender.tab;
             popupSeenTabs.add(tab.id);
+            scheduleVerify(tab.id, 12000); // 12초 안에 끝났다는 소식이 없으면 멈춘 것으로 보고 확인
             chrome.storage.local.get({ logEnabled: false }, ({ logEnabled }) => {
                 // 기록을 켜지 않았으면 쿠키를 읽지 않음
                 if (!logEnabled) return reply();
@@ -114,6 +118,18 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
 // 사이트별 처리 결과 기록. r: "ok" 처리 완료, "fail" 처리 못 함, "none" 쿠키 창 못 찾음
 // engine: 처리한 엔진. "ac" autoconsent, "com" Consent-O-Matic, 못 찾은 경우는 없음
 // 같은 사이트의 같은 결과는 6시간 안에 1번만 기록 (쓰기는 차례대로 처리)
+// 방금(2분 안에) 처리에 성공한 사이트. 동의를 저장하면서 페이지를 새로 고치는 사이트는
+// 새로 뜬 페이지의 "저장했습니다" 안내를 쿠키 창으로 다시 알아보고 실패로 알리는 일이 있어, 그 실패는 무시함
+// (확인: gov.uk, termly.io, 2026-11-21 시험)
+const recentOk = new Map();
+function markOk(host) {
+    if (host) recentOk.set(host, Date.now());
+}
+function wasJustOk(host) {
+    const t = recentOk.get(host);
+    return t != null && Date.now() - t < 120000;
+}
+
 let visitQueue = Promise.resolve();
 function logVisit(host, r, cmp, engine) {
     if (!host) return;
@@ -122,8 +138,17 @@ function logVisit(host, r, cmp, engine) {
             // 기록은 사용자가 기록 화면에서 켰을 때만 남김
             if (!logEnabled) return resolve();
             const now = Date.now();
-            const dup = visitLog.some((e) => e.h === host && e.r === r && now - e.t < 6 * 3600 * 1000);
-            if (dup) return resolve();
+            const dup = visitLog.find((e) => e.h === host && e.r === r && now - e.t < 6 * 3600 * 1000);
+            if (dup) {
+                // 같은 결과를 다른 엔진이 다시 낸 경우(확인 뒤 넘겨받음) 엔진 표시만 갱신
+                if (engine && dup.e !== engine) {
+                    dup.e = engine;
+                    dup.c = cmp;
+                    chrome.storage.local.set({ visitLog: visitLog }, resolve);
+                    return;
+                }
+                return resolve();
+            }
             visitLog.push({ h: host, t: now, r: r, c: cmp, e: engine || null });
             chrome.storage.local.set({ visitLog: visitLog.slice(-2000) }, resolve);
         });
@@ -261,10 +286,32 @@ function loadRuleFile(name) {
     return ruleFiles[name];
 }
 
+// 허용 단계: 0 필수만, 1 기능까지, 2 통계까지, 3 전부 허용
+async function currentLevel() {
+    const v = await GDPRConfig.getConsentValues();
+    return (v.D || v.E || v.F || v.X) ? 3 : v.B ? 2 : v.A ? 1 : 0;
+}
+
 // 전부 허용 단계면 optIn, 그 밖에는 optOut
 async function autoconsentAction() {
-    const v = await GDPRConfig.getConsentValues();
-    return (v.D || v.E || v.F || v.X) ? "optIn" : "optOut";
+    return (await currentLevel()) === 3 ? "optIn" : "optOut";
+}
+
+// 종류별 선택(기능까지, 통계까지)은 Consent-O-Matic이 먼저 처리함.
+// 이 엔진은 설정 창을 열어 놓고 멈추거나, 창이 남았는데 끝났다고 알리는 경우가 있어서,
+// 처리가 끝난 뒤(또는 멈춘 것으로 보일 때) 탭의 모든 프레임에 autoconsent로 다시 확인하게 함.
+// autoconsent는 쿠키 창이 아직 보일 때만 움직이므로, 잘 끝난 사이트에서는 아무 일도 하지 않음
+const verifyTimers = new Map();
+function scheduleVerify(tabId, delay) {
+    clearTimeout(verifyTimers.get(tabId));
+    verifyTimers.set(tabId, setTimeout(async () => {
+        verifyTimers.delete(tabId);
+        const level = await currentLevel();
+        if (level !== 1 && level !== 2) return;
+        try {
+            chrome.tabs.sendMessage(tabId, { type: "cookieHelperVerify" }, () => void chrome.runtime.lastError);
+        } catch (e) { /* 탭이 닫힌 경우 */ }
+    }, delay));
 }
 
 function sendToFrame(tabId, frameId, message) {
@@ -338,9 +385,10 @@ async function handleAutoconsent(message, sender) {
         case "optOutResult":
         case "optInResult": {
             if (!message.result) {
-                logVisit(site, "fail", message.cmp, "ac");
                 notice(tabId, "cancel");
-                if (tabStatusMap.get(tabId) !== STATUS.HANDLED) {
+                // 다른 엔진이 이미 처리를 끝낸 탭에서 확인만 하다 실패한 경우는 실패로 기록하지 않음
+                if (tabStatusMap.get(tabId) !== STATUS.HANDLED && !wasJustOk(site)) {
+                    logVisit(site, "fail", message.cmp, "ac");
                     setBadgeCheckmark("✗", tabId);
                     tabStatusMap.set(tabId, STATUS.ERROR);
                 }
@@ -351,16 +399,19 @@ async function handleAutoconsent(message, sender) {
         case "autoconsentDone": {
             setBadgeCheckmark("✔", tabId);
             tabStatusMap.set(tabId, STATUS.HANDLED);
+            markOk(site);
             logVisit(site, "ok", message.cmp, "ac");
             chrome.storage.local.get({ handledLog: [] }, ({ handledLog }) => {
                 handledLog.push({ t: Date.now() });
                 chrome.storage.local.set({ handledLog: handledLog.slice(-300) });
             });
             scheduleAfterSnapshot(sender.tab, message.cmp);
-            const action = await autoconsentAction();
+            const level = await currentLevel();
             notice(tabId, "done", message.isCosmetic
                 ? "쿠키 창 가림 (거부 버튼 없는 창)"
-                : action === "optIn" ? "쿠키 창 닫음, 전부 허용" : "쿠키 창 닫음, 필수만 허용");
+                : level === 3 ? "쿠키 창 닫음, 전부 허용"
+                : level === 0 ? "쿠키 창 닫음, 필수만 허용"
+                : "쿠키 창 닫음, 필수만 허용 (종류별 선택이 안 되는 창)");
             break;
         }
     }

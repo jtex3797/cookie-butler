@@ -98,7 +98,21 @@ async function runLevel(level, sites, outDir) {
                 }
                 row.seconds = Math.round((Date.now() - started) / 100) / 10;
                 // 처리 뒤 쿠키 기록(4초 뒤 저장)과 화면이 안정되기를 기다림
-                await sleep(row.result === "ok" ? 5500 : 1500);
+                // 종류별 선택 단계(1, 2)는 처리 뒤 확인과 넘겨받기가 이어지므로 접속 후 24초까지는 지켜봄
+                const settle = (level === 1 || level === 2)
+                    ? Math.max(9000, 24000 - (Date.now() - started))
+                    : (row.result === "ok" ? 5500 : 1500);
+                await sleep(settle);
+                {
+                    // 기다리는 동안 결과나 엔진이 바뀌었으면 마지막 기록으로 갱신
+                    const { visitLog } = await readLog();
+                    const last = visitLog.filter((e) => e.h === row.host).pop();
+                    if (last) {
+                        row.result = last.r;
+                        row.cmp = last.c || "";
+                        row.engine = last.e || "";
+                    }
+                }
                 row.leftover = await page.evaluate(leftoverBanner).catch(() => "");
                 await page.screenshot({ path: path.join(shots, name + "-2.jpg"), type: "jpeg", quality: 60 }).catch(() => {});
                 const { cookieLog } = await readLog();
@@ -156,7 +170,11 @@ function report(runs) {
 
 (async () => {
     const levels = process.argv[2] != null ? [Number(process.argv[2])] : [0, 2];
-    const sites = process.argv[3] != null ? SITES.slice(0, Number(process.argv[3])) : SITES;
+    // 셋째 값: 숫자면 앞에서 그만큼만, 글자면 주소에 그 글자가 들어간 사이트만(쉼표로 여러 개)
+    const pick = process.argv[3];
+    const sites = pick == null ? SITES
+        : /^[0-9]+$/.test(pick) ? SITES.slice(0, Number(pick))
+        : SITES.filter((url) => pick.split(",").some((key) => url.includes(key)));
     if (!fs.existsSync(path.join(EXTENSION, "manifest.json"))) {
         console.error("확장 프로그램 빌드가 없음. extension 폴더에서 npm run build 먼저 실행");
         process.exit(1);

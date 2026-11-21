@@ -114,6 +114,34 @@ async function startConsentOMatic(host, consentTypes, onNothing) {
     }
 }
 
+// 모든 프레임: 배경이 "다시 확인"을 지시하면 Consent-O-Matic을 멈추고 autoconsent로 남은 창을 확인
+chrome.runtime.onMessage.addListener((message) => {
+    if (!message || message.type !== "cookieHelperVerify") return;
+    stopConsentOMatic();
+    startAutoconsent(() => { /* 남은 창 없음 */ });
+});
+
+// 멈춰 있을 수 있는 Consent-O-Matic 엔진을 정리. 가려 둔 요소는 되돌려야 autoconsent가 창을 볼 수 있음
+function stopConsentOMatic() {
+    const engine = ConsentEngine.singleton;
+    if (engine == null) return;
+    try {
+        engine.handledCallback = () => {};
+        clearTimeout(engine.stopEngineId);
+        clearInterval(engine.domScannerIntervalID);
+        if (engine.queueId != null) clearTimeout(engine.queueId);
+        engine.stopObserver();
+        if (engine.currentCMP != null) {
+            engine.currentCMP.stopObservers();
+            engine.currentCMP.unHideAll();
+        }
+        // "처리 중"에 멈춘 알림은 내림. 결과 문구를 보여 주는 중이면 스스로 내려가게 둠
+        if (engine.modal != null && !engine.modal.classList.contains("CookieHelper-Done")) {
+            engine.hideProgressDialog();
+        }
+    } catch (e) { /* 정리 실패는 무시하고 확인을 계속함 */ }
+}
+
 // 맨 위 페이지만: 이 페이지가 불러온 주소 목록을 알려 줌 (쿠키 기록용)
 if (window === window.parent) {
     chrome.runtime.onMessage.addListener((message, sender, reply) => {

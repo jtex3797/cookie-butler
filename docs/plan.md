@@ -29,6 +29,7 @@
 - 단계: 0 필수만, 1 기능까지(A), 2 통계까지(A, B), 3 전부 허용(A, B, D, E, F, X). 저장 형식은 Consent-O-Matic의 `consentValues`
 - 단계 0과 3: autoconsent 먼저(optOut 또는 optIn), 못 찾으면 Consent-O-Matic
 - 단계 1과 2: Consent-O-Matic 먼저(종류별 선택), 못 찾으면 autoconsent optOut
+- 종류별 선택 뒤 확인: Consent-O-Matic이 처리를 끝냈거나(1.5초 뒤) 시작 후 12초 동안 소식이 없으면, 배경이 탭의 모든 프레임에 `cookieHelperVerify`를 보내 Consent-O-Matic을 정리하고 autoconsent를 시작. 쿠키 창이 아직 보이면 autoconsent가 전부 거부로 처리(단계 1, 2에서만). 근거: 2026-11-21 시험에서 통계까지 단계 실패 6곳 중 4곳이 Consent-O-Matic이 창을 열어 놓고 멈추거나 잘못 완료 보고한 경우
 - "못 찾음" 판정
   - autoconsent: `instance.state.lifecycle`을 0.2초 간격으로 확인. `nothingDetected`이거나, `cmpDetected`(업체 흔적은 있으나 창이 안 보임) 상태가 7초(35회)를 넘거나, 전체 100회(20초)를 넘으면 못 찾은 것으로 처리. autoconsent는 창이 뜨기를 약 5초 기다린 뒤 상태를 바꾸지 않고 끝내기 때문
   - Consent-O-Matic: 엔진이 5초 동안 못 찾으면 콜백에서 handled, error 모두 아닌 경우
