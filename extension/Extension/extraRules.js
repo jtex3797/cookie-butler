@@ -120,6 +120,9 @@ export function patchRules(config) {
         // contentpass: "동의하거나 유료 구독" 창. 원본 규칙은 창이 남는데도 처리 완료로 알림
         // (확인: corriere.it). 빼 두면 "거부 선택지 없는 창"으로 표시됨
         if (/^contentpass/i.test(name)) delete config[name];
+        // gov.uk: 원본 규칙은 쿠키 설정 페이지로 이동해서 처리함. 도중에 멈추면 보던 페이지 대신
+        // 설정 페이지에 남게 됨(확인: 2026-11-21 시험). autoconsent는 제자리에서 처리하므로 그쪽에 맡김
+        if (/^gov\.uk/i.test(name)) delete config[name];
     }
 
     // didomi: 종류를 하나라도 고르지 않으면 "Save" 버튼이 눌리지 않음.

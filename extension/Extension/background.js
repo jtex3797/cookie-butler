@@ -87,6 +87,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
             // 동의 창을 처리하기 직전의 쿠키 상태 기록
             const tab = sender.tab;
             popupSeenTabs.add(tab.id);
+            comTabs.add(tab.id);
             scheduleVerify(tab.id, 12000); // 12초 안에 끝났다는 소식이 없으면 멈춘 것으로 보고 확인
             chrome.storage.local.get({ logEnabled: false }, ({ logEnabled }) => {
                 // 기록을 켜지 않았으면 쿠키를 읽지 않음
@@ -263,6 +264,8 @@ chrome.tabs.onUpdated.addListener((tabId, info, tab)=>{
     // 원본은 "Loading"과 비교해 한 번도 맞지 않았음. Chrome이 주는 값은 소문자 "loading"
     if(info.status != null && info.status === "loading") {
         popupSeenTabs.delete(tabId);
+        comTabs.delete(tabId);
+        waitingPopups.delete(tabId);
         setBadgeCheckmark("", tabId);
         tabStatusMap.set(tabId, STATUS.INIT);
     }
@@ -314,8 +317,8 @@ async function autoconsentAction() {
 
 // 종류별 선택(기능까지, 통계까지)은 Consent-O-Matic이 먼저 처리함.
 // 이 엔진은 설정 창을 열어 놓고 멈추거나, 창이 남았는데 끝났다고 알리는 경우가 있어서,
-// 처리가 끝난 뒤(또는 멈춘 것으로 보일 때) 탭의 모든 프레임에 autoconsent로 다시 확인하게 함.
-// autoconsent는 쿠키 창이 아직 보일 때만 움직이므로, 잘 끝난 사이트에서는 아무 일도 하지 않음
+// 처리가 끝난 뒤(또는 멈춘 것으로 보일 때) 탭의 모든 프레임에 "찾아 둔 창이 아직 떠 있는지" 물어봄.
+// 떠 있다고 답한 프레임이 있으면 autoconsent가 이어받고, 잘 끝난 사이트에서는 아무 일도 하지 않음
 const verifyTimers = new Map();
 function scheduleVerify(tabId, delay) {
     clearTimeout(verifyTimers.get(tabId));
@@ -324,7 +327,7 @@ function scheduleVerify(tabId, delay) {
         const level = await currentLevel();
         if (level !== 1 && level !== 2) return;
         try {
-            chrome.tabs.sendMessage(tabId, { type: "cookieHelperVerify" }, () => void chrome.runtime.lastError);
+            chrome.tabs.sendMessage(tabId, { type: "cookieHelperRecheck" }, () => void chrome.runtime.lastError);
         } catch (e) { /* 탭이 닫힌 경우 */ }
     }, delay));
 }
@@ -338,6 +341,28 @@ function sendToFrame(tabId, frameId, message) {
 // 작은 알림은 맨 위 페이지에 표시
 function notice(tabId, phase, text) {
     sendToFrame(tabId, 0, { type: "cookieHelperNotice", phase: phase, text: text });
+}
+
+// Consent-O-Matic이 처리를 시작한 탭, autoconsent가 창을 찾아 두고 지시를 기다리는 프레임(탭 -> 프레임)
+const comTabs = new Set();
+const waitingPopups = new Map();
+
+// autoconsent에 처리를 맡김: Consent-O-Matic을 멈추고, 알림을 띄우고, 처리 전 쿠키를 기록한 뒤 지시를 보냄
+async function goAutoconsent(tab, frameId) {
+    const tabId = tab.id;
+    waitingPopups.delete(tabId);
+    try {
+        chrome.tabs.sendMessage(tabId, { type: "cookieHelperStopCom" }, () => void chrome.runtime.lastError);
+    } catch (e) { /* 탭이 닫힌 경우 */ }
+    notice(tabId, "start", "쿠키 창 처리 중");
+    const { logEnabled } = await chrome.storage.local.get({ logEnabled: false });
+    if (logEnabled) {
+        try {
+            const list = await snapshotCookies(tab);
+            pendingCookies.set(tabId, { h: hostOf(tab.url), t: Date.now(), before: list });
+        } catch (e) { /* 쿠키를 읽을 수 없는 경우 기록만 건너뜀 */ }
+    }
+    sendToFrame(tabId, frameId, { type: await autoconsentAction() });
 }
 
 async function handleAutoconsent(message, sender) {
@@ -385,15 +410,26 @@ async function handleAutoconsent(message, sender) {
 
         case "popupFound": {
             popupSeenTabs.add(tabId);
-            notice(tabId, "start", "쿠키 창 처리 중");
-            const { logEnabled } = await chrome.storage.local.get({ logEnabled: false });
-            if (logEnabled) {
-                try {
-                    const list = await snapshotCookies(sender.tab);
-                    pendingCookies.set(tabId, { h: site, t: Date.now(), before: list });
-                } catch (e) { /* 쿠키를 읽을 수 없는 경우 기록만 건너뜀 */ }
+            const level = await currentLevel();
+            if (level === 1 || level === 2) {
+                // 종류별 선택 단계: Consent-O-Matic이 이 창을 맡는지 1.2초 지켜봄.
+                // 맡으면 끝난 뒤 다시 확인하고, 안 맡으면 autoconsent가 전부 거부로 처리
+                waitingPopups.set(tabId, frameId);
+                if (!comTabs.has(tabId)) {
+                    setTimeout(() => {
+                        if (!comTabs.has(tabId) && waitingPopups.get(tabId) === frameId) goAutoconsent(sender.tab, frameId);
+                    }, 1200);
+                }
+                break;
             }
-            sendToFrame(tabId, frameId, { type: await autoconsentAction() });
+            await goAutoconsent(sender.tab, frameId);
+            break;
+        }
+
+        case "cookieHelperRecheckResult": {
+            // Consent-O-Matic 처리 뒤에도 창이 떠 있으면 autoconsent가 이어받음
+            if (message.open) await goAutoconsent(sender.tab, frameId);
+            else waitingPopups.delete(tabId);
             break;
         }
 

@@ -15,6 +15,7 @@ const tbClick = (button, first, second) => ({
 
 const iubendaTb = {
     name: "iubenda-tb",
+    prehideSelectors: ["tb-banner-wrapper"], // 뜨기 전에 미리 가려서 번쩍임을 없앰
     detectCmp: [{ exists: "tb-banner-wrapper" }],
     detectPopup: [{ visible: tbButton("tb-action-button", "button") }],
     optOut: [tbClick("button.reject-button", "tb-action-button", "tb-action-button:nth-of-type(2)")],

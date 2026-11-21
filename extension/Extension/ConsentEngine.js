@@ -228,6 +228,7 @@ export default class ConsentEngine {
             //Check if popup shows, then do consent stuff
             let numberOfTries = 5;
             async function checkIsShowing() {
+                if (self.aborted) return; // 다른 엔진에 맡기기로 한 뒤
                 if (cmp.isShowing()) {
                     self.currentCMP = cmp;
                     if (ConsentEngine.debugValues.debugLog) {
@@ -235,6 +236,7 @@ export default class ConsentEngine {
                         console.log(cmp.name + " - Showing");
                     }
                     setTimeout(async () => {
+                        if (self.aborted) return;
                         if (cmp.isUtility()) {
                             if (ConsentEngine.debugValues.debugLog) {
                                 console.groupCollapsed(cmp.name + " - UTILITY");
@@ -271,6 +273,7 @@ export default class ConsentEngine {
                                         resolve();
                                     }
                                 });
+                                if (self.aborted) return;
 
                                 if (!ConsentEngine.debugValues.skipHideMethod) {
                                     self.showProgressDialog("쿠키 창 처리 중");

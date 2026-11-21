@@ -28,7 +28,7 @@
 
 - 단계: 0 필수만, 1 기능까지(A), 2 통계까지(A, B), 3 전부 허용(A, B, D, E, F, X). 저장 형식은 Consent-O-Matic의 `consentValues`
 - 단계 0과 3: autoconsent 먼저(optOut 또는 optIn), 못 찾으면 Consent-O-Matic
-- 단계 1과 2: Consent-O-Matic 먼저(종류별 선택), 못 찾으면 autoconsent optOut
+- 단계 1과 2: 두 엔진을 함께 시작. autoconsent는 창을 찾아도 지시를 기다리고(`autoAction: null`), 배경은 1.2초 동안 Consent-O-Matic이 그 창을 맡는지(`CMPShowing`) 지켜봄. 맡으면 Consent-O-Matic이 종류별로 처리하고, 끝난 뒤 `cookieHelperRecheck`로 창이 아직 떠 있는지 물어 떠 있으면 autoconsent가 이어받음. 안 맡으면 `cookieHelperStopCom`으로 Consent-O-Matic을 멈추고 autoconsent optOut. (차례로 쓰던 방식은 5초 대기 때문에 창이 한참 떠 있다가 사라져서 변경)
 - 종류별 선택 뒤 확인: Consent-O-Matic이 처리를 끝냈거나(1.5초 뒤) 시작 후 12초 동안 소식이 없으면, 배경이 탭의 모든 프레임에 `cookieHelperVerify`를 보내 Consent-O-Matic을 정리하고 autoconsent를 시작. 쿠키 창이 아직 보이면 autoconsent가 전부 거부로 처리(단계 1, 2에서만). 근거: 2026-11-21 시험에서 통계까지 단계 실패 6곳 중 4곳이 Consent-O-Matic이 창을 열어 놓고 멈추거나 잘못 완료 보고한 경우
 - 거부 선택지 없는 창: 두 엔진 모두 못 찾았을 때 맨 위 페이지에서 `findConsentWall`로 "동의 또는 유료 구독" 창이 보이는지 글자로 추정. 보이면 `ConsentWall`을 보내 결과 `wall`(처리 불가), 아이콘 "!", 작은 알림으로 표시. 버튼은 누르지 않음. Consent-O-Matic의 contentpass 규칙은 잘못된 완료 보고 때문에 제외
 - 직접 추가한 autoconsent 형식 규칙: `extraAutoconsentRules.js`(iubenda 새 창)

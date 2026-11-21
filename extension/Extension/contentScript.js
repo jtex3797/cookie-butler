@@ -53,19 +53,30 @@ async function contentScriptRunner() {
     // 먼저 쓴 엔진이 쿠키 창을 못 찾으면 다른 엔진으로 한 번 더 찾음.
     const runAutoconsent = (onNothing) => startAutoconsent(onNothing);
     const runConsentOMatic = (onNothing) => startConsentOMatic(host, consentTypes, onNothing);
-    const [first, second] = (level === 0 || level === 3)
-        ? [runAutoconsent, runConsentOMatic]
-        : [runConsentOMatic, runAutoconsent];
+    const finish = () => {
+        if (!isTop) return;
+        // 두 엔진 모두 못 찾음. 거부 선택지 없는 동의 창이 떠 있으면 그렇게 알림
+        chrome.runtime.sendMessage(findConsentWall() ? "ConsentWall" : "NothingFound");
+    };
 
-    first(async () => {
-        // 같은 탭의 다른 프레임이 이미 쿠키 창을 찾았으면 여기서는 더 찾지 않음 (두 엔진이 같은 창을 동시에 누르는 일 방지)
-        if (await ask("PopupSeen")) return;
-        second(() => {
-            if (!isTop) return;
-            // 두 엔진 모두 못 찾음. 거부 선택지 없는 동의 창이 떠 있으면 그렇게 알림
-            chrome.runtime.sendMessage(findConsentWall() ? "ConsentWall" : "NothingFound");
+    if (level === 0 || level === 3) {
+        // 필수만, 전부 허용: autoconsent 먼저, 못 찾으면 Consent-O-Matic
+        runAutoconsent(async () => {
+            // 같은 탭의 다른 프레임이 이미 쿠키 창을 찾았으면 여기서는 더 찾지 않음 (두 엔진이 같은 창을 동시에 누르는 일 방지)
+            if (await ask("PopupSeen")) return;
+            runConsentOMatic(finish);
         });
-    });
+    } else {
+        // 기능까지, 통계까지: 두 엔진을 함께 시작.
+        // autoconsent는 창을 찾아도 배경의 지시를 기다리고, 배경은 Consent-O-Matic이 그 창을 맡는지 잠깐 지켜본 뒤 정함.
+        // (차례로 쓰면 Consent-O-Matic이 5초를 기다린 뒤에야 autoconsent가 시작돼, 창이 한참 떠 있다가 사라짐)
+        let left = 2;
+        const done = () => {
+            if (--left === 0) finish();
+        };
+        runConsentOMatic(done);
+        runAutoconsent(done);
+    }
 }
 
 // 거부 선택지 없이 "동의하거나 유료 구독"만 고르게 하는 창이 화면에 있는지 확인.
@@ -142,11 +153,10 @@ async function startConsentOMatic(host, consentTypes, onNothing) {
     }
 }
 
-// 모든 프레임: 배경이 "다시 확인"을 지시하면 Consent-O-Matic을 멈추고 autoconsent로 남은 창을 확인
+// 모든 프레임: 배경이 autoconsent에 처리를 맡기기로 하면 Consent-O-Matic을 멈춤
 chrome.runtime.onMessage.addListener((message) => {
-    if (!message || message.type !== "cookieHelperVerify") return;
+    if (!message || message.type !== "cookieHelperStopCom") return;
     stopConsentOMatic();
-    startAutoconsent(() => { /* 남은 창 없음 */ });
 });
 
 // 멈춰 있을 수 있는 Consent-O-Matic 엔진을 정리. 가려 둔 요소는 되돌려야 autoconsent가 창을 볼 수 있음
@@ -154,6 +164,7 @@ function stopConsentOMatic() {
     const engine = ConsentEngine.singleton;
     if (engine == null) return;
     try {
+        engine.aborted = true;
         engine.handledCallback = () => {};
         clearTimeout(engine.stopEngineId);
         clearInterval(engine.domScannerIntervalID);

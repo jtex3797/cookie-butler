@@ -24,6 +24,18 @@ export function startAutoconsent(onNothing) {
     });
 
     chrome.runtime.onMessage.addListener((message) => {
+        // 배경이 "찾아 둔 창이 아직 떠 있는지" 물어봄 (Consent-O-Matic이 처리한 뒤 확인용).
+        // 창을 찾아 두고 지시를 기다리는 프레임만 답함
+        if (message && message.type === "cookieHelperRecheck") {
+            const cmp = instance.foundCmp;
+            if (cmp == null || acted || gaveUp) return;
+            Promise.resolve().then(() => cmp.detectPopup()).catch(() => false).then((open) => {
+                try {
+                    chrome.runtime.sendMessage({ type: "cookieHelperRecheckResult", open: !!open }).catch(() => {});
+                } catch (e) { /* 확장 프로그램이 새로 고침된 경우 */ }
+            });
+            return;
+        }
         if (message && FROM_BACKGROUND.has(message.type)) {
             if (message.type === "optOut" || message.type === "optIn") {
                 // 규칙 여러 개가 같은 창을 찾으면 지시가 여러 번 올 수 있음. 처리는 1번만
