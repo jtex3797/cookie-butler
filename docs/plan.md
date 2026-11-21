@@ -1,6 +1,6 @@
 # Cookie Butler 설계와 남은 계획
 
-작성일: 2026-11-21. 대상 폴더: `D:\CodeWorkspace\my-project\cookie-helper`
+작성일: 2026-11-21. 대상 폴더: `D:\CodeWorkspace\my-project\cookie-butler`
 
 ## 1. 목적
 
@@ -90,8 +90,8 @@
 
 ## 검토 기록 (2026-11-21 01:33)
 
-- 프로젝트 경로: D:/CodeWorkspace/my-project/cookie-helper
-- 검토 대상: D:/CodeWorkspace/my-project/cookie-helper/docs/plan.md
+- 프로젝트 경로: D:/CodeWorkspace/my-project/cookie-butler
+- 검토 대상: D:/CodeWorkspace/my-project/cookie-butler/docs/plan.md
 - 설정: 에이전트 3, 라운드 3, 최우선 가치 단순성
 
 반영 9/9 (채택 9, 부분 0, 기각 0) / 완성도 90% / 추가 검토: 권장 1라운드 (파급)
@@ -142,7 +142,7 @@
 - 실제 브라우저 검증은 미실시. 남은 계획: 빌드 확인, 시험 도구, 보완, 쿠키 지우기 버튼, 스토어 등록
 
 ```json
-{"start":"2026-11-20T16:33:30.469Z","session":"4c69f26d-3bef-4cad-ab67-d1645a2c98ac","project":"cookie-helper","target":"D:/CodeWorkspace/my-project/cookie-helper/docs/plan.md",
+{"start":"2026-11-20T16:33:30.469Z","session":"4c69f26d-3bef-4cad-ab67-d1645a2c98ac","project":"cookie-butler","target":"D:/CodeWorkspace/my-project/cookie-butler/docs/plan.md",
  "settings":{"agents":3,"rounds":3,"value":"단순성"},
  "completeness":90,"more":"권장 1라운드 (파급)",
  "main":{"model":"claude-fable-5-2","tools":30,"in":10855887,"cacheRead":10785908,"out":38027},
