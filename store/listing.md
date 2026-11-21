@@ -12,13 +12,15 @@
 ## 2. 등록 문구
 
 ### 이름
-쿠키 도우미
+Cookie Butler
+
+스토어 표시 이름 후보: `Cookie Butler - 쿠키 동의 창 자동 처리` (검색용 설명을 붙인 형태)
 
 ### 요약 (manifest의 description과 같게 유지)
 쿠키 동의 창을 정해 둔 범위대로 대신 처리합니다. 필수만, 기능까지, 통계까지, 전부 허용 중 선택.
 
 ### 상세 설명 (한국어)
-쿠키 도우미는 웹사이트에 뜨는 쿠키 동의 창을 대신 처리합니다.
+Cookie Butler는 웹사이트에 뜨는 쿠키 동의 창을 대신 처리합니다.
 
 사용 방법
 - 주소창 옆 아이콘을 눌러 얼마나 허용할지 정합니다: 필수만, 기능까지, 통계까지, 전부 허용.
@@ -40,7 +42,7 @@
 - 동의 창을 찾고 처리하는 부분은 autoconsent(DuckDuckGo, MPL-2.0)와 Consent-O-Matic(CAVI, Aarhus University, MIT License)을 사용합니다.
 
 ### 상세 설명 (영어)
-Cookie Helper answers cookie consent dialogs for you.
+Cookie Butler answers cookie consent dialogs for you.
 
 - Choose how much to allow from the toolbar popup: necessary only, plus functional, plus statistics, or allow all.
 - When a consent dialog appears, the extension clicks through it with your choice and shows a small notice at the bottom left.

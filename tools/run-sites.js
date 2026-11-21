@@ -1,4 +1,4 @@
-// 쿠키 도우미 시험 도구.
+// Cookie Butler 시험 도구.
 // 분리된 시험용 Chromium을 빈 임시 프로필로 띄우고, 확장 프로그램을 넣은 뒤 사이트 목록을 자동 방문.
 // 결과는 tools/results/<시각>/ 에 표(report.md), 원자료(results.json), 화면 사진으로 저장. 끝나면 프로필 삭제.
 //
@@ -150,7 +150,7 @@ async function runLevel(level, sites, outDir) {
 }
 
 function report(runs) {
-    const out = ["# 쿠키 도우미 사이트 시험 결과", "", "실행 시각: " + new Date().toLocaleString("ko-KR"), "사이트 수: " + runs[0].rows.length, ""];
+    const out = ["# Cookie Butler 사이트 시험 결과", "", "실행 시각: " + new Date().toLocaleString("ko-KR"), "사이트 수: " + runs[0].rows.length, ""];
     for (const run of runs) {
         const count = (r) => run.rows.filter((x) => x.result === r).length;
         const left = run.rows.filter((x) => x.leftover).length;

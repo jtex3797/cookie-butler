@@ -117,11 +117,11 @@ $("#bar").addEventListener("click", (e) => {
 $("#q").addEventListener("input", draw);
 
 $("#export").addEventListener("click", () => {
-    const out = { app: "cookie-helper", exported: new Date().toISOString(), visitLog: data.visitLog, cookieLog: data.cookieLog };
+    const out = { app: "cookie-butler", exported: new Date().toISOString(), visitLog: data.visitLog, cookieLog: data.cookieLog };
     const url = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = "cookie-helper-log-" + new Date().toISOString().slice(0, 10) + ".json";
+    a.download = "cookie-butler-log-" + new Date().toISOString().slice(0, 10) + ".json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 });

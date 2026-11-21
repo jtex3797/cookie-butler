@@ -1,8 +1,8 @@
-# 쿠키 도우미 개인정보 처리 안내
+# Cookie Butler 개인정보 처리 안내
 
 최종 수정일: 2026-11-21
 
-쿠키 도우미는 웹사이트의 쿠키 동의 창을 사용자가 정한 범위에 맞춰 대신 처리하는 브라우저 확장 프로그램입니다. 이 문서는 확장 프로그램이 어떤 정보를 다루는지 설명합니다.
+Cookie Butler는 웹사이트의 쿠키 동의 창을 사용자가 정한 범위에 맞춰 대신 처리하는 브라우저 확장 프로그램입니다. 이 문서는 확장 프로그램이 어떤 정보를 다루는지 설명합니다.
 
 ## 요약
 
@@ -44,11 +44,11 @@
 
 ---
 
-# Cookie Helper Privacy Policy (English summary)
+# Cookie Butler Privacy Policy (English summary)
 
 Last updated: 2026-11-21
 
-Cookie Helper automatically answers cookie consent dialogs according to the level you choose.
+Cookie Butler automatically answers cookie consent dialogs according to the level you choose.
 
 - No data is sent to the developer or any third party. Everything is stored locally in your browser.
 - Browsing-related records (site hostname, result, and cookie names, domains and lifetimes before and after a consent dialog is handled) are stored only if you turn on "Keep records" on the records page. It is off by default. Cookie values are never stored.

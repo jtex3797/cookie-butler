@@ -1,5 +1,5 @@
 {
-	"name": "쿠키 도우미",
+	"name": "Cookie Butler",
 	"description": "쿠키 동의 창을 정해 둔 범위대로 대신 처리합니다. 필수만, 기능까지, 통계까지, 전부 허용 중 선택.",
 	"author": "Consent-O-Matic (CAVI - Aarhus University) 기반 개조",
 	"version": "REPLACED_BY_BUILD_SCRIPT",
@@ -13,7 +13,7 @@
 		"<all_urls>"
 	],
 	"action": {
-		"default_title": "쿠키 도우미",
+		"default_title": "Cookie Butler",
 		"default_popup": "popup.html",
 		"default_icon": {
 			"16": "icon_16.png",

@@ -1,4 +1,4 @@
-# 쿠키 도우미 설계와 남은 계획
+# Cookie Butler 설계와 남은 계획
 
 작성일: 2026-11-21. 대상 폴더: `D:\CodeWorkspace\my-project\cookie-helper`
 

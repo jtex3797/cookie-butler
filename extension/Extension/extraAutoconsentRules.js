@@ -1,4 +1,4 @@
-// 쿠키 도우미가 직접 추가한 autoconsent 형식 규칙. autoconsent 규칙 묶음에 없는 동의 창을 여기에 넣음.
+// Cookie Butler가 직접 추가한 autoconsent 형식 규칙. autoconsent 규칙 묶음에 없는 동의 창을 여기에 넣음.
 // 선택자를 배열로 쓰면 앞 요소의 분리된 영역(shadow DOM) 안에서 다음 선택자를 찾음.
 
 // iubenda의 새 창: <tb-banner-wrapper> 안에 영역이 3겹으로 분리돼 있음

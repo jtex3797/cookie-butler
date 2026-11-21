@@ -1,8 +1,8 @@
 {
-  "name": "cookie-helper-tools",
+  "name": "cookie-butler-tools",
   "private": true,
   "version": "0.1.0",
-  "description": "쿠키 도우미 시험 도구: 분리된 시험용 브라우저로 사이트를 자동 방문",
+  "description": "Cookie Butler 시험 도구: 분리된 시험용 브라우저로 사이트를 자동 방문",
   "scripts": {
     "sites": "node run-sites.js"
   },

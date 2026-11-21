@@ -41,7 +41,7 @@ function makeGallery(dir) {
         return `<div class="stat"><b>${LEVEL[run.level]}</b><span>처리 완료 ${n("ok")}</span><span>쿠키 창 없음 ${n("none")}</span><span>처리 불가 ${n("wall")}</span><span>처리 못 함 ${n("fail")}</span><span>열기 실패 ${n("error") + n("timeout")}</span><span>남은 창 의심 ${run.rows.filter((x) => x.leftover).length}</span></div>`;
     }).join("");
     const html = `<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>쿠키 도우미 시험 결과</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cookie Butler 시험 결과</title>
 <style>
 :root{--bg:#121418;--panel:#1c2026;--raise:#282d35;--raise2:#343a44;--text:#ece8df;--mute:#9299a3;--acc:#e8500a;--acc2:#ff6a1f}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -75,7 +75,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 @media(max-width:700px){.shots{grid-template-columns:1fr}}
 </style></head>
 <body><main>
-<h1>쿠키 도우미 시험 결과</h1>
+<h1>Cookie Butler 시험 결과</h1>
 <p class="lead">사이트 ${count}곳. 사진을 누르면 원래 크기로 열림. 왼쪽은 접속 약 1초 뒤, 오른쪽은 처리 뒤.</p>
 <div class="stats">${summary}</div>
 <div class="bar" id="bar">

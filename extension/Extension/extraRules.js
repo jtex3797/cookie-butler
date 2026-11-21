@@ -1,4 +1,4 @@
-// 쿠키 도우미가 직접 추가한 규칙. 원본(Consent-O-Matic) 규칙 목록에 없는 동의 창을 여기에 넣음.
+// Cookie Butler가 직접 추가한 규칙. 원본(Consent-O-Matic) 규칙 목록에 없는 동의 창을 여기에 넣음.
 // 형식은 원본 규칙과 같음. 같은 이름이 원본에 생기면 여기 것이 우선.
 
 // usercentrics 새 버전(v3): 창이 <aside id="usercentrics-cmp-ui"> 안쪽의 분리된 영역에 들어 있음
