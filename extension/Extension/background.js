@@ -143,6 +143,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
 // 새로 뜬 페이지의 "저장했습니다" 안내를 쿠키 창으로 다시 알아보고 실패로 알리는 일이 있어, 그 실패는 무시함
 // (확인: gov.uk, termly.io, 2026-11-21 시험)
 const recentOk = new Map();
+// 방금 보여 준 결과 알림 문구(사이트별). 처리 직후 페이지가 새로 고쳐지면 알림이 같이 사라지므로 새 페이지에 한 번 더 보여 줌
+const doneTexts = new Map();
 function markOk(host) {
     if (host) recentOk.set(host, Date.now());
 }
@@ -274,6 +276,19 @@ chrome.tabs.onUpdated.addListener((tabId, info, tab)=>{
         setBadgeCheckmark("", tabId);
         tabStatusMap.set(tabId, STATUS.INIT);
     }
+    // 처리 직후(6초 안) 새로 고쳐진 페이지: 체크 표시를 바로 되살리고 결과 알림을 한 번 더 보여 줌
+    if (info.status === "complete" && tab && tab.url) {
+        const host = hostOf(tab.url);
+        if (wasJustOk(host)) {
+            setBadgeCheckmark("\u2714", tabId);
+            tabStatusMap.set(tabId, STATUS.HANDLED);
+            const done = doneTexts.get(host);
+            if (done && Date.now() - done.t < 6000) {
+                doneTexts.delete(host);
+                notice(tabId, "done", done.text);
+            }
+        }
+    }
 });
 
 // ---- DuckDuckGo autoconsent 연결 ----
@@ -359,7 +374,9 @@ async function goAutoconsent(tab, frameId) {
     try {
         chrome.tabs.sendMessage(tabId, { type: "cookieHelperStopCom" }, () => void chrome.runtime.lastError);
     } catch (e) { /* 탭이 닫힌 경우 */ }
-    notice(tabId, "start", "쿠키 창 처리 중");
+    // 방금 처리한 사이트가 새로 고쳐진 뒤 같은 창을 다시 알아본 경우에는 "처리 중" 알림을 띄우지 않음.
+    // 이때는 누를 버튼이 없어 엔진이 한참 기다리다 끝나고, 그동안 알림이 계속 남아 있었음 (확인: termly.io)
+    if (!wasJustOk(hostOf(tab.url))) notice(tabId, "start", "쿠키 창 처리 중");
     const { logEnabled } = await chrome.storage.local.get({ logEnabled: false });
     if (logEnabled) {
         try {
@@ -463,11 +480,13 @@ async function handleAutoconsent(message, sender) {
             });
             scheduleAfterSnapshot(sender.tab, message.cmp);
             const level = await currentLevel();
-            notice(tabId, "done", message.isCosmetic
+            const doneText = message.isCosmetic
                 ? "쿠키 창 가림 (거부 버튼 없는 창)"
                 : level === 3 ? "쿠키 창 닫음, 전부 허용"
                 : level === 0 ? "쿠키 창 닫음, 필수만 허용"
-                : "쿠키 창 닫음, 필수만 허용 (종류별 선택이 안 되는 창)");
+                : "쿠키 창 닫음, 필수만 허용 (종류별 선택이 안 되는 창)";
+            doneTexts.set(site, { text: doneText, t: Date.now() });
+            notice(tabId, "done", doneText);
             break;
         }
     }
