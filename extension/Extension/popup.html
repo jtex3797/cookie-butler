@@ -41,6 +41,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;heigh
 .sw:disabled{opacity:.4;cursor:default}
 .more{width:100%;margin-top:8px;background:var(--raise);border-radius:8px;padding:9px;font-size:12px;font-weight:600}
 .more:hover{background:var(--raise2)}
+.more.ask{background:var(--acc);color:#fff}
+.more:disabled{opacity:.4;cursor:default}
 </style>
 </head>
 <body>
@@ -62,6 +64,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;heigh
     <div class="t"><b id="host"></b><small id="hostSub">이 사이트에서 사용</small></div>
     <button class="sw" id="siteSw" aria-label="이 사이트에서 사용"></button>
   </div>
+  <button class="more" id="clearSite">이 사이트 쿠키 지우기</button>
   <button class="more" id="openLog">기록 보기</button>
   <script src="ui.js"></script>
 </body>

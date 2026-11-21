@@ -69,8 +69,41 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         $("#host").textContent = "이 페이지";
         $("#hostSub").textContent = "여기서는 동작하지 않음";
         sw.disabled = true;
+        $("#clearSite").disabled = true;
         return;
     }
+
+    // 이 사이트 쿠키 지우기: 첫 번째 누름은 확인, 두 번째 누름에 삭제 후 새로 고침
+    const clearButton = $("#clearSite");
+    clearButton.addEventListener("click", async () => {
+        if (!clearButton.classList.contains("ask")) {
+            clearButton.classList.add("ask");
+            clearButton.textContent = "한 번 더 누르면 삭제 (이 사이트에서 로그아웃됨)";
+            return;
+        }
+        clearButton.disabled = true;
+        clearButton.textContent = "지우는 중";
+        try {
+            // 이 주소로 보내지는 쿠키 전부 (상위 주소에 심긴 것 포함)
+            const cookies = await chrome.cookies.getAll({ url: tab.url });
+            await Promise.all(cookies.map((c) => chrome.cookies.remove({
+                url: (c.secure ? "https://" : "http://") + c.domain.replace(/^\./, "") + c.path,
+                name: c.name,
+                storeId: c.storeId
+            }).catch(() => null)));
+            // 동의 선택을 쿠키 대신 브라우저 저장 공간에 두는 사이트도 있어서 같이 비움
+            await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: () => {
+                    try { localStorage.clear(); } catch (e) { /* 접근 불가 */ }
+                    try { sessionStorage.clear(); } catch (e) { /* 접근 불가 */ }
+                }
+            }).catch(() => null);
+        } finally {
+            chrome.tabs.reload(tab.id);
+            window.close();
+        }
+    });
 
     $("#host").textContent = host;
     GDPRConfig.isActive(host).then((active) => sw.classList.toggle("on", active));
