@@ -39,7 +39,7 @@ h1{font-size:22px}
 .row.open .head i{transform:rotate(225deg)}
 .res{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:6px;padding:3px 9px;background:var(--raise2);white-space:nowrap}
 .res.ok{background:var(--acc);color:#fff}
-.res.fail{background:#3a2218;color:var(--acc2)}
+.res.fail,.res.wall{background:#3a2218;color:var(--acc2)}
 .body{display:none;padding:4px 14px 16px}
 .row.open .body{display:block}
 .meta{color:var(--mute);font-size:12px;margin-bottom:10px}
@@ -89,6 +89,7 @@ h1{font-size:22px}
     <button class="chip" data-f="ok">처리 완료</button>
     <button class="chip" data-f="fail">처리 못 함</button>
     <button class="chip" data-f="none">쿠키 창 없음</button>
+    <button class="chip" data-f="wall">처리 불가</button>
     <input id="q" type="search" placeholder="사이트 주소 검색" aria-label="사이트 주소 검색">
   </div>
   <div id="list"></div>

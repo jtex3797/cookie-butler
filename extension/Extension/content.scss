@@ -109,6 +109,13 @@
     background: #e8500a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9.5l2.6 2.6L13 6.6' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
+/* 처리하지 않음 안내: 돌아가는 표시를 느낌표로 교체 */
+.CookieHelper-Info .ConsentOMatic-Progress-Dialog:before {
+    border: 0;
+    animation: none;
+    background: #e8500a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M9 4.5v5.5' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='9' cy='13.2' r='1.4' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
 @keyframes cookiehelper-spin {
     to {
         transform: rotate(360deg);

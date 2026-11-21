@@ -61,9 +61,37 @@ async function contentScriptRunner() {
         // 같은 탭의 다른 프레임이 이미 쿠키 창을 찾았으면 여기서는 더 찾지 않음 (두 엔진이 같은 창을 동시에 누르는 일 방지)
         if (await ask("PopupSeen")) return;
         second(() => {
-            if (isTop) chrome.runtime.sendMessage("NothingFound");
+            if (!isTop) return;
+            // 두 엔진 모두 못 찾음. 거부 선택지 없는 동의 창이 떠 있으면 그렇게 알림
+            chrome.runtime.sendMessage(findConsentWall() ? "ConsentWall" : "NothingFound");
         });
     });
+}
+
+// 거부 선택지 없이 "동의하거나 유료 구독"만 고르게 하는 창이 화면에 있는지 확인.
+// 버튼을 누르지 않고 상태 표시에만 쓰므로 글자로 추정함.
+// 확인: lemonde.fr(.gdpr-lmd-wall), corriere.it(.privacy-cp-wall) (2026-11-21)
+function findConsentWall() {
+    const consent = /cookie|consent|consenso|données|datos|dati |daten|privacy|tracking|쿠키/i;
+    const pay = /abonn|subscri|suscr|abbon|premium|pur[- ]?abo|werbefrei|sans publicité|ad[- ]free|contentpass/i;
+    // 단독으로 "거부"만 뜻하는 버튼. "Rifiuta e abbonati"(거부하고 구독)처럼 구독이 붙은 것은 제외
+    const reject = /^(reject( all)?|refuse( all)?|decline( all)?|deny( all)?|(alle )?ablehnen|(tout )?refuser|rifiuta( tutto)?|rechazar( todo)?|weigeren|afvis( alle)?|necessary only|only necessary|nur notwendige|continue without accepting|continuer sans accepter)$/i;
+    try {
+        for (const el of document.querySelectorAll("div, section, aside, dialog, form")) {
+            const style = window.getComputedStyle(el);
+            if (style.position !== "fixed" && style.position !== "sticky" && el.tagName !== "DIALOG") continue;
+            if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) < 0.1) continue;
+            const rect = el.getBoundingClientRect();
+            if (rect.width < 300 || rect.height < 200) continue;
+            const text = (el.innerText || "").slice(0, 3000);
+            if (!consent.test(text) || !pay.test(text)) continue;
+            const buttons = Array.from(el.querySelectorAll("button, [role=button], a"))
+                .filter((b) => b.offsetHeight > 0)
+                .map((b) => (b.innerText || "").trim().replace(/\s+/g, " "));
+            if (buttons.length > 0 && !buttons.some((label) => reject.test(label))) return true;
+        }
+    } catch (e) { /* 확인 실패는 창 없음으로 처리 */ }
+    return false;
 }
 
 async function startConsentOMatic(host, consentTypes, onNothing) {
@@ -148,6 +176,7 @@ if (window === window.parent) {
         // 배경이 보낸 작은 알림 지시 (autoconsent가 처리한 경우)
         if (message && message.type === "cookieHelperNotice") {
             if (message.phase === "start") startNotice(message.text);
+            else if (message.phase === "info") endNotice(message.text, "info");
             else endNotice(message.phase === "done" ? message.text : null);
             return;
         }

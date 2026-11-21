@@ -117,6 +117,9 @@ export function patchRules(config) {
     // 종류별 선택은 안 되고 전부 거부로 처리됨
     for (const name of Object.keys(config)) {
         if (/^sourcepoint/i.test(name)) delete config[name];
+        // contentpass: "동의하거나 유료 구독" 창. 원본 규칙은 창이 남는데도 처리 완료로 알림
+        // (확인: corriere.it). 빼 두면 "거부 선택지 없는 창"으로 표시됨
+        if (/^contentpass/i.test(name)) delete config[name];
     }
 
     // didomi: 종류를 하나라도 고르지 않으면 "Save" 버튼이 눌리지 않음.

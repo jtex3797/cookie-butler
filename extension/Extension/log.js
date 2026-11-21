@@ -1,10 +1,10 @@
 // 기록 화면. 저장 형식은 background.js의 logVisit, scheduleAfterSnapshot 참고
-// visitLog: { h 사이트, t 시각, r 결과(ok|fail|none), c 동의 창 종류, e 처리 엔진(ac|com) }
+// visitLog: { h 사이트, t 시각, r 결과(ok|fail|none|wall), c 동의 창 종류, e 처리 엔진(ac|com) }
 // cookieLog: { h, t, c, lv 허용 단계, before 처리 전 쿠키, after 처리 후 새 쿠키 } / 쿠키: { n 이름, d 주소, x 외부 여부, e 남은 일수(0은 브라우저 닫을 때까지) }
 
 const $ = (s) => document.querySelector(s);
 const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-const RESULT = { ok: "처리 완료", fail: "처리 못 함", none: "쿠키 창 없음" };
+const RESULT = { ok: "처리 완료", fail: "처리 못 함", none: "쿠키 창 없음", wall: "처리 불가 (거부 없는 창)" };
 const LEVEL = ["필수만 허용", "기능까지 허용", "통계까지 허용", "전부 허용"];
 const hasStore = typeof chrome !== "undefined" && chrome.storage && chrome.storage.local;
 

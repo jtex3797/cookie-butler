@@ -10,7 +10,7 @@ const LEVELS = [
     { name: "통계까지 허용", desc: "방문 집계에 협조", allow: ["A", "B"] },
     { name: "전부 허용", desc: "맞춤 광고 포함", allow: ["A", "B", "D", "E", "F", "X"] }
 ];
-const STATUS_TEXT = { 2: "이 페이지: 쿠키 창 찾는 중", 3: "이 페이지: 처리 못 함", 4: "이 페이지: 쿠키 창 처리 완료" };
+const STATUS_TEXT = { 2: "이 페이지: 쿠키 창 찾는 중", 3: "이 페이지: 처리 못 함", 4: "이 페이지: 쿠키 창 처리 완료", 5: "이 페이지: 거부 선택지가 없는 창이라 처리 안 함" };
 
 function levelFromValues(v) {
     if (v.D || v.E || v.F || v.X) return 3;

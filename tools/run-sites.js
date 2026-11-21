@@ -20,7 +20,7 @@ const LEVELS = {
     2: { name: "통계까지", allow: ["A", "B"] },
     3: { name: "전부 허용", allow: ["A", "B", "D", "E", "F", "X"] }
 };
-const RESULT = { ok: "처리 완료", fail: "처리 못 함", none: "쿠키 창 없음", timeout: "응답 없음", error: "열기 실패" };
+const RESULT = { ok: "처리 완료", fail: "처리 못 함", none: "쿠키 창 없음", wall: "처리 불가(거부 없는 창)", timeout: "응답 없음", error: "열기 실패" };
 const ENGINE = { ac: "autoconsent", com: "Consent-O-Matic" };
 const PARALLEL = 4;        // 동시에 여는 탭 수
 const WAIT_RESULT = 30000; // 처리 결과를 기다리는 최대 시간
@@ -155,7 +155,7 @@ function report(runs) {
         const count = (r) => run.rows.filter((x) => x.result === r).length;
         const left = run.rows.filter((x) => x.leftover).length;
         out.push(`## 허용 단계: ${LEVELS[run.level].name}`, "");
-        out.push(`처리 완료 ${count("ok")}, 처리 못 함 ${count("fail")}, 쿠키 창 없음 ${count("none")}, 응답 없음 ${count("timeout")}, 열기 실패 ${count("error")} / 화면에 쿠키 창이 남은 것으로 보이는 곳 ${left}`, "");
+        out.push(`처리 완료 ${count("ok")}, 처리 못 함 ${count("fail")}, 쿠키 창 없음 ${count("none")}, 처리 불가 ${count("wall")}, 응답 없음 ${count("timeout")}, 열기 실패 ${count("error")} / 화면에 쿠키 창이 남은 것으로 보이는 곳 ${left}`, "");
         out.push("| # | 사이트 | 결과 | 동의 창 종류 | 엔진 | 걸린 시간(초) | 동의 전 쿠키(외부) | 처리 후 새 쿠키 | 남은 창 의심 | 비고 |");
         out.push("|---|---|---|---|---|---|---|---|---|---|");
         run.rows.forEach((r, i) => {

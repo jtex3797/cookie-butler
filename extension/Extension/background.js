@@ -1,12 +1,14 @@
 import GDPRConfig from './GDPRConfig.js';
 import { filterCompactRules, evalSnippets } from "@duckduckgo/autoconsent";
+import extraAutoconsentRules from "./extraAutoconsentRules.js";
 
 const STATUS = {
     "INIT": 0,
     "NOTHING": 1,
     "SEARCHING": 2,
     "ERROR": 3,
-    "HANDLED": 4
+    "HANDLED": 4,
+    "WALL": 5 // 거부 선택지가 없는 창(동의 또는 유료 구독)이라 처리하지 않음
 }
 
 chrome.runtime.onMessage.addListener(function (message, sender, reply) {
@@ -95,6 +97,19 @@ chrome.runtime.onMessage.addListener(function (message, sender, reply) {
                 }).catch(() => reply());
             });
             return true;
+        }
+
+        case "ConsentWall": {
+            // 두 엔진 모두 못 찾았고, 화면에 거부 선택지 없는 동의 창이 보이는 경우
+            const tabId = sender.tab.id;
+            if (tabStatusMap.get(tabId) !== STATUS.HANDLED) {
+                setBadgeCheckmark("!", tabId);
+                tabStatusMap.set(tabId, STATUS.WALL);
+                logVisit(hostOf(sender.tab.url), "wall", null, null);
+                notice(tabId, "info", "거부 선택지가 없는 창이라 처리하지 않음");
+            }
+            reply();
+            return false;
         }
 
         case "PopupSeen": {
@@ -336,10 +351,10 @@ async function handleAutoconsent(message, sender) {
             let rules;
             if ((await autoconsentAction()) === "optIn") {
                 // 허용 쪽 규칙은 전체 규칙 파일에만 있음
-                rules = { autoconsent: (await loadRuleFile("autoconsent/rules.json")).autoconsent };
+                rules = { autoconsent: [...(await loadRuleFile("autoconsent/rules.json")).autoconsent, ...extraAutoconsentRules] };
             } else {
                 rules = {
-                    autoconsent: [],
+                    autoconsent: extraAutoconsentRules,
                     compact: filterCompactRules(await loadRuleFile("autoconsent/compact-rules.json"), {
                         url: sender.url || sender.tab.url,
                         mainFrame: frameId === 0

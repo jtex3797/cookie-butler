@@ -29,8 +29,9 @@ export function startNotice(text) {
     timer = setTimeout(() => endNotice(null), 20000);
 }
 
-// 결과 문구를 약 2초 보여 준 뒤 내려감. text가 없으면 바로 내려감
-export function endNotice(text) {
+// 결과 문구를 잠깐 보여 준 뒤 내려감. text가 없으면 바로 내려감.
+// kind가 "info"면 체크 대신 느낌표 표시(처리하지 않은 경우)이고 조금 더 오래 보여 줌
+export function endNotice(text, kind) {
     if (modal == null) {
         if (!text) return;
         startNotice(text);
@@ -40,7 +41,7 @@ export function endNotice(text) {
     clearTimeout(timer);
     if (text) {
         shown.querySelector("p").innerText = text;
-        shown.classList.add("CookieHelper-Done");
+        shown.classList.add(kind === "info" ? "CookieHelper-Info" : "CookieHelper-Done");
     }
     timer = setTimeout(() => {
         shown.classList.add("ConsentOMatic-Progress-Complete");
@@ -48,5 +49,5 @@ export function endNotice(text) {
             shown.remove();
             if (modal === shown) modal = null;
         }, 500);
-    }, text ? 2200 : 0);
+    }, !text ? 0 : kind === "info" ? 3500 : 2200);
 }

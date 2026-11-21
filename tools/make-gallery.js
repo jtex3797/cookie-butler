@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 const LEVEL = { 0: "필수만", 1: "기능까지", 2: "통계까지", 3: "전부 허용" };
-const RESULT = { ok: "처리 완료", fail: "처리 못 함", none: "쿠키 창 없음", timeout: "응답 없음", error: "열기 실패" };
+const RESULT = { ok: "처리 완료", fail: "처리 못 함", none: "쿠키 창 없음", wall: "처리 불가(거부 없는 창)", timeout: "응답 없음", error: "열기 실패" };
 const ENGINE = { ac: "autoconsent", com: "Consent-O-Matic" };
 const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
@@ -38,7 +38,7 @@ function makeGallery(dir) {
     }
     const summary = runs.map((run) => {
         const n = (r) => run.rows.filter((x) => x.result === r).length;
-        return `<div class="stat"><b>${LEVEL[run.level]}</b><span>처리 완료 ${n("ok")}</span><span>쿠키 창 없음 ${n("none")}</span><span>처리 못 함 ${n("fail")}</span><span>열기 실패 ${n("error") + n("timeout")}</span><span>남은 창 의심 ${run.rows.filter((x) => x.leftover).length}</span></div>`;
+        return `<div class="stat"><b>${LEVEL[run.level]}</b><span>처리 완료 ${n("ok")}</span><span>쿠키 창 없음 ${n("none")}</span><span>처리 불가 ${n("wall")}</span><span>처리 못 함 ${n("fail")}</span><span>열기 실패 ${n("error") + n("timeout")}</span><span>남은 창 의심 ${run.rows.filter((x) => x.leftover).length}</span></div>`;
     }).join("");
     const html = `<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>쿠키 도우미 시험 결과</title>
@@ -64,7 +64,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 .lv{color:var(--text);font-size:13px}
 .res{font-weight:700;border-radius:6px;padding:2px 9px;background:var(--raise2);color:var(--text)}
 .res.ok{background:var(--acc);color:#fff}
-.res.fail,.res.error,.res.timeout{background:#3a2218;color:var(--acc2)}
+.res.fail,.res.wall,.res.error,.res.timeout{background:#3a2218;color:var(--acc2)}
 .warn{color:var(--acc2);font-weight:700}
 .shots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .shots a{position:relative;display:block;border-radius:8px;overflow:hidden;background:#000}
