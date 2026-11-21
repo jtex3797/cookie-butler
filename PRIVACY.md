@@ -40,7 +40,7 @@ Cookie Butler는 웹사이트의 쿠키 동의 창을 사용자가 정한 범위
 
 ## 문의
 
-이 안내에 대한 문의는 저장소의 이슈 게시판으로 보내 주세요.
+이 안내에 대한 문의는 저장소의 이슈 게시판으로 보내 주세요: https://github.com/jtex3797/cookie-butler/issues
 
 ---
 

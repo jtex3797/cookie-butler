@@ -83,7 +83,7 @@ Consent dialog handling uses autoconsent (DuckDuckGo, MPL-2.0) and Consent-O-Mat
 - 인증 항목: 판매 안 함, 단일 목적과 무관한 용도로 사용 안 함, 신용 평가 용도로 사용 안 함
 
 ### 개인정보 처리 안내 주소
-`PRIVACY.md`를 공개 주소에 게시한 뒤 그 주소 입력. 게시 위치 미정(GitHub 공개 저장소 또는 GitHub Pages).
+https://github.com/jtex3797/cookie-butler/blob/main/PRIVACY.md
 
 ## 4. 그림
 
@@ -106,7 +106,7 @@ Consent dialog handling uses autoconsent (DuckDuckGo, MPL-2.0) and Consent-O-Mat
 - [x] 시험 사이트 25곳 자동 시험(2026-11-21): 쿠키 창이 뜬 18곳 중 16곳 처리, 2곳 처리 불가 표시
 - [x] 화면 사진 3장 제작
 - [ ] 평소 쓰는 Chrome에서 "이 사이트 쿠키 지우기" 버튼과 기록 화면 확인
-- [ ] `PRIVACY.md` 공개 주소 결정과 게시
+- [x] `PRIVACY.md` 공개 주소 게시 (GitHub 공개 저장소)
 - [ ] 원본의 `logo.svg`, `hide.svg`, `minimize.svg` 사용 여부 확인 후 미사용분 제거
 - [ ] 한국어 외 언어 지원 여부 결정(화면 문구가 한국어 고정)
 - [ ] Chrome 개발자 등록과 결제, Edge Partner Center 등록 (본인이 직접)
