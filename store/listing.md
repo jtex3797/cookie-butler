@@ -90,7 +90,7 @@ https://github.com/jtex3797/cookie-butler/blob/main/PRIVACY.md
 | 항목 | 규격 | 필수 | 상태 |
 |---|---|---|---|
 | 스토어 아이콘 | 128x128 PNG, 그림 96x96과 둘레 16 투명 여백 | 필수 | `store/store-icon-128.png` 생성 완료 |
-| 화면 사진 | 1280x800 또는 640x400, 1~5장, 여백 없이 꽉 차게 | 1장 이상 필수 | 3장 제작 완료: `store/screenshot-1.png`(작은 창), `screenshot-2.png`(처리 알림), `screenshot-3.png`(기록 화면). `tools/make-store-shots.js`로 재생성 |
+| 화면 사진 | 1280x800 또는 640x400, 1~5장, 여백 없이 꽉 차게 | 1장 이상 필수 | 3장 제작 완료: `store/screenshot-1.png`(작은 창), `screenshot-2.png`(처리 알림), `screenshot-3.png`(기록 화면). 영어판 `screenshot-en-1~3.png`(2026-11-22). `tools/make-store-shots.js [ko|en]`으로 재생성 |
 | 작은 홍보 그림 | 440x280 | 선택 | 미제작 |
 | 큰 홍보 그림 | 1400x560 | 선택 | 미제작 |
 
@@ -98,7 +98,8 @@ https://github.com/jtex3797/cookie-butler/blob/main/PRIVACY.md
 
 ## 5. 올릴 묶음
 
-- `extension/build/dist/` 안의 zip 파일 (빌드할 때 자동 생성)
+- `extension/build/dist/` 안의 zip 파일 (빌드할 때 자동 생성, 현재 v0.1.1)
+- 스크린샷 배치: 현지화(ko) 칸에 `screenshot-1~3.png`, 전 언어 공통 칸에 `screenshot-en-1~3.png`
 - 묶음에 `LICENSE.txt`(Consent-O-Matic 저작권 표시), `autoconsent/LICENSE.txt`(MPL-2.0) 포함
 
 ## 6. 남은 일

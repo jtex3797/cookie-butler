@@ -1,6 +1,6 @@
 {
   "name": "cookie-butler",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "쿠키 동의 창을 대신 처리하는 브라우저 확장 프로그램 (Consent-O-Matic 기반)",
   "license": "MIT",
   "scripts": {

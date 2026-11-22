@@ -1,5 +1,5 @@
 // 스토어 등록용 화면 사진(1280x800)을 store/ 폴더에 만듦. 시험용 브라우저에 확장 프로그램을 넣어 실제 화면을 찍음.
-// 실행: node make-store-shots.js
+// 실행: node make-store-shots.js [ko|en]  (기본 ko, en이면 파일 이름이 screenshot-en-N.png)
 //  screenshot-1.png  사이트 위에 작은 창이 열린 모습
 //  screenshot-2.png  쿠키 창을 처리한 직후의 좌하단 알림
 //  screenshot-3.png  기록 화면
@@ -14,14 +14,18 @@ const OUT = path.join(__dirname, "..", "store");
 const MAIN = "https://www.gov.uk/";
 const MORE = ["https://stackoverflow.com/", "https://www.ikea.com/de/de/", "https://www.cookieyes.com/", "https://www.corriere.it/"];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const LANG = process.argv[2] === "en" ? "en" : "ko";
+const shot = (n) => path.join(OUT, LANG === "en" ? `screenshot-en-${n}.png` : `screenshot-${n}.png`);
+// 화면 문구로 상태를 알아보는 부분 (_locales의 noticeClosed, noCookieRecord)
+const TEXT = LANG === "en" ? { closed: "closed", noRecord: "No cookie record" } : { closed: "닫음", noRecord: "쿠키 기록 없음" };
 
 (async () => {
     const profile = path.join(__dirname, ".profile-shots");
     const tmp = path.join(__dirname, ".shots-tmp");
     fs.mkdirSync(tmp, { recursive: true });
     const context = await chromium.launchPersistentContext(profile, {
-        channel: "chromium", headless: true, viewport: { width: 1280, height: 800 }, locale: "ko-KR",
-        args: ["--disable-extensions-except=" + EXTENSION, "--load-extension=" + EXTENSION]
+        channel: "chromium", headless: true, viewport: { width: 1280, height: 800 }, locale: LANG === "en" ? "en-US" : "ko-KR",
+        args: ["--lang=" + LANG, "--disable-extensions-except=" + EXTENSION, "--load-extension=" + EXTENSION]
     });
     try {
         const worker = context.serviceWorkers()[0] || await context.waitForEvent("serviceworker", { timeout: 15000 });
@@ -37,9 +41,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
                 const n = document.querySelector(".ConsentOMatic-Progress-Dialog-Modal.CookieHelper-Done");
                 return n ? n.innerText : "";
             }).catch(() => "");
-            if (text.includes("닫음")) {
+            if (text.includes(TEXT.closed)) {
                 await sleep(450); // 올라오는 움직임이 끝난 뒤
-                await page.screenshot({ path: path.join(OUT, "screenshot-2.png") });
+                await page.screenshot({ path: shot(2) });
                 caught = true;
             } else {
                 await sleep(100);
@@ -78,7 +82,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         const c = await context.newPage();
         await c.goto(pathToFileURL(compose).href);
         await c.waitForLoadState("networkidle");
-        await c.screenshot({ path: path.join(OUT, "screenshot-1.png") });
+        await c.screenshot({ path: shot(1) });
         await c.close();
 
         // 3번 사진: 기록 화면 (첫 줄을 펼친 모습)
@@ -89,10 +93,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
         const n = await rows.count();
         for (let i = 0; i < n; i++) {
             // 쿠키 기록이 있는 첫 사이트를 펼침
-            if (!(await rows.nth(i).innerText()).includes("쿠키 기록 없음")) { await rows.nth(i).click(); break; }
+            if (!(await rows.nth(i).innerText()).includes(TEXT.noRecord)) { await rows.nth(i).click(); break; }
         }
         await sleep(400);
-        await log.screenshot({ path: path.join(OUT, "screenshot-3.png") });
+        await log.screenshot({ path: shot(3) });
         console.log("기록 화면 사이트 수:", n);
     } finally {
         await context.close().catch(() => {});
