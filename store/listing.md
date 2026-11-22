@@ -91,7 +91,7 @@ https://github.com/jtex3797/cookie-butler/blob/main/PRIVACY.md
 |---|---|---|---|
 | 스토어 아이콘 | 128x128 PNG, 그림 96x96과 둘레 16 투명 여백 | 필수 | `store/store-icon-128.png` 생성 완료 |
 | 화면 사진 | 1280x800 또는 640x400, 1~5장, 여백 없이 꽉 차게 | 1장 이상 필수 | 3장 제작 완료: `store/screenshot-1.png`(작은 창), `screenshot-2.png`(처리 알림), `screenshot-3.png`(기록 화면). 영어판 `screenshot-en-1~3.png`(2026-11-22). `tools/make-store-shots.js [ko|en]`으로 재생성 |
-| 작은 홍보 그림 | 440x280 | 선택 | 미제작 |
+| 작은 홍보 그림 | 440x280 | 필수(대시보드 표시 기준) | `store/promo-small-440x280.png` 제작 완료(2026-11-22) |
 | 큰 홍보 그림 | 1400x560 | 선택 | 미제작 |
 
 화면 사진의 배경 사이트는 영국 정부 사이트(gov.uk). 다른 사이트로 바꾸려면 `tools/make-store-shots.js`의 MAIN 값 변경.
@@ -110,5 +110,8 @@ https://github.com/jtex3797/cookie-butler/blob/main/PRIVACY.md
 - [x] `PRIVACY.md` 공개 주소 게시 (GitHub 공개 저장소)
 - [x] 원본의 `logo.svg`, `hide.svg`, `minimize.svg` 미사용 확인 후 제거(2026-11-21)
 - [x] 영어 화면 문구 추가(2026-11-21): 작은 창, 기록 화면, 처리 알림. 영어와 한국어 브라우저에서 화면 확인 완료
-- [ ] Chrome 개발자 등록과 결제, Edge Partner Center 등록 (본인이 직접)
-- [ ] Edge Add-ons 요구 사항 확인
+- [x] Chrome 개발자 등록, Chrome 웹 스토어 검토 제출(2026-11-22, v0.1.1)
+- [x] Edge Partner Center 가입, Edge Add-ons 항목 작성(2026-11-22, v0.1.1)
+- [x] Edge Add-ons 게시 제출(2026-11-22, 검토 중)
+- [ ] Edge 카테고리 변경: 제출본은 "블로깅", 승인 뒤 "생산성"으로 변경 후 다시 게시
+- [x] Edge Add-ons 요구 사항 확인(카테고리 생산성, 검토팀 제출 문구는 영어)
